@@ -16,6 +16,10 @@
 		0B117C6E1CFB2A030092D268 /* CTNetWorkTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B117C6D1CFB2A030092D268 /* CTNetWorkTests.m */; };
 		49BA00008E07969FBE979B0C /* libPods-CTNetWork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B3A645697AF1DD29A61E5B /* libPods-CTNetWork.a */; };
 		843F15C31CFC1F7E00CE4A19 /* CTHTTPSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */; };
+		843F15C61CFC22B600CE4A19 /* CTBaseRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15C51CFC22B600CE4A19 /* CTBaseRequest.m */; };
+		843F15C91CFC253200CE4A19 /* CTNetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15C81CFC253200CE4A19 /* CTNetworkManager.m */; };
+		843F15CC1CFC298300CE4A19 /* CTNetworkCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15CB1CFC298300CE4A19 /* CTNetworkCache.m */; };
+		843F15CF1CFC29C100CE4A19 /* CTNetworkConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15CE1CFC29C100CE4A19 /* CTNetworkConfiguration.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +48,14 @@
 		0B117C6F1CFB2A030092D268 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHTTPSessionManager.h; sourceTree = "<group>"; };
 		843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHTTPSessionManager.m; sourceTree = "<group>"; };
+		843F15C41CFC22B600CE4A19 /* CTBaseRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseRequest.h; sourceTree = "<group>"; };
+		843F15C51CFC22B600CE4A19 /* CTBaseRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTBaseRequest.m; sourceTree = "<group>"; };
+		843F15C71CFC253200CE4A19 /* CTNetworkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTNetworkManager.h; sourceTree = "<group>"; };
+		843F15C81CFC253200CE4A19 /* CTNetworkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTNetworkManager.m; sourceTree = "<group>"; };
+		843F15CA1CFC298300CE4A19 /* CTNetworkCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTNetworkCache.h; sourceTree = "<group>"; };
+		843F15CB1CFC298300CE4A19 /* CTNetworkCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTNetworkCache.m; sourceTree = "<group>"; };
+		843F15CD1CFC29C100CE4A19 /* CTNetworkConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTNetworkConfiguration.h; sourceTree = "<group>"; };
+		843F15CE1CFC29C100CE4A19 /* CTNetworkConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTNetworkConfiguration.m; sourceTree = "<group>"; };
 		A5B3A645697AF1DD29A61E5B /* libPods-CTNetWork.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CTNetWork.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB36B9F90714C2A71D663707 /* Pods-CTNetWork.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CTNetWork.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork.debug.xcconfig"; sourceTree = "<group>"; };
 		F8CE4DA1D8B846C1EA30E5B4 /* Pods-CTNetWork.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CTNetWork.release.xcconfig"; path = "Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork.release.xcconfig"; sourceTree = "<group>"; };
@@ -135,6 +147,14 @@
 			children = (
 				843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */,
 				843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */,
+				843F15C41CFC22B600CE4A19 /* CTBaseRequest.h */,
+				843F15C51CFC22B600CE4A19 /* CTBaseRequest.m */,
+				843F15C71CFC253200CE4A19 /* CTNetworkManager.h */,
+				843F15C81CFC253200CE4A19 /* CTNetworkManager.m */,
+				843F15CA1CFC298300CE4A19 /* CTNetworkCache.h */,
+				843F15CB1CFC298300CE4A19 /* CTNetworkCache.m */,
+				843F15CD1CFC29C100CE4A19 /* CTNetworkConfiguration.h */,
+				843F15CE1CFC29C100CE4A19 /* CTNetworkConfiguration.m */,
 			);
 			path = CTNetWork;
 			sourceTree = "<group>";
@@ -303,8 +323,12 @@
 			files = (
 				0B117C5B1CFB2A030092D268 /* ViewController.m in Sources */,
 				0B117C581CFB2A030092D268 /* AppDelegate.m in Sources */,
+				843F15CC1CFC298300CE4A19 /* CTNetworkCache.m in Sources */,
 				0B117C551CFB2A030092D268 /* main.m in Sources */,
+				843F15CF1CFC29C100CE4A19 /* CTNetworkConfiguration.m in Sources */,
 				843F15C31CFC1F7E00CE4A19 /* CTHTTPSessionManager.m in Sources */,
+				843F15C61CFC22B600CE4A19 /* CTBaseRequest.m in Sources */,
+				843F15C91CFC253200CE4A19 /* CTNetworkManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
