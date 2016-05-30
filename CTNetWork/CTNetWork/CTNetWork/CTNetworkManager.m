@@ -283,12 +283,26 @@ static CTNetworkManager *_manager = nil;
     NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
     self.tempRequestDic[requestKey] = request;
     
+    NSString * url = [self buildRequestUrl:request];
+    
+    NSDictionary * headerFieldValueDictionary = request.requestHTTPHeaderFields;
+    if (headerFieldValueDictionary != nil) {
+        for (id httpHeaderField in headerFieldValueDictionary.allKeys) {
+            id value = headerFieldValueDictionary[httpHeaderField];
+            if ([httpHeaderField isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
+                [_sessionManager.requestSerializer setValue:(NSString *)value forHTTPHeaderField:(NSString *)httpHeaderField];
+            } else {
+                NSLog(@"Error, class of key/value in headerFieldValueDictionary should be NSString.");
+            }
+        }
+    }
+    
     //发送请求
     __weak CTNetworkManager *weakManager = self;
     switch (request.requestMethod) {
         case CTNetworkRequestHTTPGet:
         {
-            request.sessionTask = [self.sessionManager GET:request.methodName parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            request.sessionTask = [self.sessionManager GET:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
                 [weakManager networkFailure:request error:error completion:failureBlock];
@@ -297,7 +311,7 @@ static CTNetworkManager *_manager = nil;
             break;
         case CTNetworkRequestHTTPPost:
         {
-            request.sessionTask = [self.sessionManager POST:request.methodName parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
                 [weakManager networkFailure:request error:error completion:failureBlock];
@@ -306,7 +320,7 @@ static CTNetworkManager *_manager = nil;
             break;
         case CTNetworkRequestHTTPDelete:
         {
-            request.sessionTask = [self.sessionManager DELETE:request.methodName parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            request.sessionTask = [self.sessionManager DELETE:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
                 [weakManager networkFailure:request error:error completion:failureBlock];
@@ -316,7 +330,7 @@ static CTNetworkManager *_manager = nil;
 
         case CTNetworkRequestHTTPPut:
         {
-            request.sessionTask = [self.sessionManager PUT:request.methodName parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            request.sessionTask = [self.sessionManager PUT:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
                 [weakManager networkFailure:request error:error completion:failureBlock];
@@ -327,7 +341,20 @@ static CTNetworkManager *_manager = nil;
         default:
             break;
     }
+    
+    [request.sessionTask resume];
 }
+
+- (NSString *)buildRequestUrl:(CTBaseRequest *)request
+{
+    NSString *detailUrl = [request interface];
+    if ([detailUrl hasPrefix:@"http"]) {
+        return detailUrl;
+    }
+    // filter url
+    return [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
+}
+
 
 #pragma mark - cache method -
 - (void)readCacheWithRequest:(CTBaseRequest *)request completion:(void (^)(CTBaseRequest *request, id responseObject))completionBlock
@@ -358,11 +385,9 @@ static CTNetworkManager *_manager = nil;
     NSParameterAssert(configuration);
     NSParameterAssert(configuration.baseURLString);
     
-    NSURLSessionConfiguration * sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    sessionConfiguration.timeoutIntervalForRequest = configuration.timeInterval;
     
     // CTHTTPSessionManager
-    _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString] sessionConfiguration:sessionConfiguration];
+    _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
     AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
     //是否允许CA不信任的证书通过
     policy.allowInvalidCertificates = YES;
@@ -378,8 +403,20 @@ static CTNetworkManager *_manager = nil;
 //    CTAFResponseSerializer *responseSerializer = [CTAFResponseSerializer serializer];
     
     //设置
-    _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
-    _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    if (configuration.requestType == CTRequestSerializerTypeJSON) {
+        _sessionManager.requestSerializer = [AFJSONRequestSerializer serializer];
+    }else {
+        _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
+    }
+    
+    if (configuration.responseType == CTResponseSerializerTypeJSON) {
+        _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
+    }else {
+        _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    }
+
+    _sessionManager.requestSerializer.timeoutInterval = configuration.timeInterval;
+    
     
     self.baseURL = [NSURL URLWithString:configuration.baseURLString];
     _configuration = configuration;

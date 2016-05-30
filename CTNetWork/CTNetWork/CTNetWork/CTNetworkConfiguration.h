@@ -9,6 +9,20 @@
 #import <Foundation/Foundation.h>
 #import "CTBaseRequest.h"
 
+
+typedef NS_ENUM(NSInteger, CTRequestSerializerType)
+{
+    CTRequestSerializerTypeJSON = 0,
+    CTRequestSerializerTypeHTTP,
+};
+
+typedef NS_ENUM(NSInteger, CTResponseSerializerType)
+{
+    CTResponseSerializerTypeJSON = 0,
+    CTResponseSerializerTypeHTTP,
+};
+
+
 @protocol CTNetworkConfiguration <NSObject>
 
 @required
@@ -96,11 +110,21 @@
 
 @end
 
+
 @interface CTNetworkConfiguration : NSObject<CTNetworkConfiguration>
 /**
  *  超时时间
  */
 @property (nonatomic, assign) NSTimeInterval timeInterval;
+
+/**
+ *   default CTRequestSerializerTypeJSON
+ */
+@property (nonatomic, assign)CTRequestSerializerType requestType;
+/**
+ *   default CTResponseSerializerTypeJSON
+ */
+@property (nonatomic, assign)CTResponseSerializerType responseType;
 
 + (instancetype _Nonnull)configuration;
 + (instancetype _Nonnull)configurationWithBaseURL:(NSString * _Nonnull)baseURL;
