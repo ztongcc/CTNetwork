@@ -81,10 +81,4 @@
     return NO;
 }
 
-- (BOOL)shouldBusinessSuccessWithResponseData:(id)responseData task:(NSURLSessionDataTask *)task request:(CTBaseRequest *)request
-{
-    return YES;
-}
-
-
 @end

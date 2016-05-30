@@ -51,9 +51,8 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
 };
 
 #pragma mark - completion block
-typedef void(^CTSuccessCompletionBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable response);
-typedef void(^  CTBusinessFailureBlock)(CTBaseRequest  * _Nonnull request, id _Nullable response);
-typedef void(^   CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
+typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable response);
+typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
 
 @protocol CTNetworkRequestDelegate;
 @protocol CTNetResponseHandle <NSObject>
@@ -81,6 +80,10 @@ typedef void(^   CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSErr
  *  请求标识码，每个请求都拥有唯一的标示
  */
 @property (nonatomic, assign, readonly) NSUInteger requestIdentifier;
+/**
+ *  缓存有效期
+ */
+@property (nonatomic, assign) NSTimeInterval cacheValidInterval;
 /**
  *  方法名
  */
@@ -141,7 +144,6 @@ typedef void(^   CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSErr
  *  @param businessFailureBlock   业务失败回调
  *  @param networkFailureBlock    网络失败回调
  */
-- (void)sendRequestWithSuccess:(CTSuccessCompletionBlock _Nullable)successCompletionBlock
-               businessFailure:(CTBusinessFailureBlock   _Nullable)businessFailureBlock
-                networkFailure:(CTNetworkFailureBlock    _Nullable)networkFailureBlock;
+- (void)sendRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successCompletionBlock
+                networkFailure:(CTNetworkFailureBlock _Nullable)networkFailureBlock;
 @end

@@ -49,8 +49,8 @@
  *  @param networkFailureBlock    网络失败调回
  */
 - (void)sendRequest:(CTBaseRequest * _Nonnull)request
-            success:(CTSuccessCompletionBlock _Nullable)successCompletionBlock
-            failure:(CTNetworkFailureBlock    _Nullable)networkFailureBlock;
+            success:(CTNetworkSuccessBlock _Nullable)successBlock
+            failure:(CTNetworkFailureBlock _Nullable)failureBlock;
 
 /**
  *  发送下载请求

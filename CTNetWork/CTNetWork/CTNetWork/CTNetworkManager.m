@@ -8,38 +8,7 @@
 
 #import "CTNetworkManager.h"
 #import "CTHTTPSessionManager.h"
-
-static inline NSString * CTURLStringFromBaseURLAndMethod(NSURL *baseURL, NSString *methodName)
-{
-    return [[NSURL URLWithString:methodName relativeToURL:baseURL] absoluteString];
-}
-
-static inline NSString *CTKeyFromRequestAndBaseURL(CTBaseRequest *request, NSURL *baseURL)
-{
-    return CTKeyFromParamsAndURLString(request.parametersDic, CTURLStringFromBaseURLAndMethod(baseURL, request.methodName));
-}
-
-static id CTParseJsonData(id jsonData){
-    /**
-     *  解析json对象
-     */
-    NSError *error;
-    id jsonResult = nil;
-    if([NSJSONSerialization isValidJSONObject:jsonData]){
-        return jsonData;
-    }
-    //NSData
-    if (jsonData && [jsonData isKindOfClass:[NSData class]]){
-        jsonResult = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&error];
-    }
-    if (jsonResult != nil && error == nil){
-        return jsonResult;
-    }
-    else{
-        // 解析错误
-        return nil;
-    }
-}
+#import "CTUtil.h"
 
 static CTNetworkManager *_manager = nil;
 
@@ -240,7 +209,7 @@ static CTNetworkManager *_manager = nil;
 //}
 //
 - (void)sendRequest:(CTBaseRequest *)request
-            success:(CTSuccessCompletionBlock)successBlock
+            success:(CTNetworkSuccessBlock)successBlock
             failure:(CTNetworkFailureBlock)failureBlock
 {
     //发送网络之前，先进行一下预处理
@@ -259,15 +228,14 @@ static CTNetworkManager *_manager = nil;
                     /*
                      缓存策略
                      CTBaseRequestCacheDataAndReadCacheOnly：获取缓存数据直接调回，不再请求
-                     CTBaseRequestCacheDataAndReadCacheLoadData：缓存数据成功调回并且重新请求网络
                      */
-                    [self success:request responseObject:responseObject completion:successBlock];
-                    
+                    [self success:request responseObject:responseObject completion:successBlock isFromCache:YES];
+
+                    // CTBaseRequestCacheDataAndReadCacheLoadData：缓存数据成功调回并且重新请求网络
                     if(request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData){
                         [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
                     }
-                }
-                else{
+                }else{
                     //无缓存数据，则还需要再请求网络
                     [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
                 }
@@ -276,7 +244,7 @@ static CTNetworkManager *_manager = nil;
 }
 
 - (void)startNetworkDataWithRequest:(CTBaseRequest *)request
-                            success:(CTSuccessCompletionBlock)successBlock
+                            success:(CTNetworkSuccessBlock)successBlock
                             failure:(CTNetworkFailureBlock)failureBlock
 {
     //临时保存请求
@@ -305,7 +273,7 @@ static CTNetworkManager *_manager = nil;
             request.sessionTask = [self.sessionManager GET:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager networkFailure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error completion:failureBlock];
             }];
         }
             break;
@@ -314,7 +282,7 @@ static CTNetworkManager *_manager = nil;
             request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager networkFailure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error completion:failureBlock];
             }];
         }
             break;
@@ -323,7 +291,7 @@ static CTNetworkManager *_manager = nil;
             request.sessionTask = [self.sessionManager DELETE:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager networkFailure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error completion:failureBlock];
             }];
         }
             break;
@@ -333,7 +301,7 @@ static CTNetworkManager *_manager = nil;
             request.sessionTask = [self.sessionManager PUT:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager networkFailure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error completion:failureBlock];
             }];
         }
             break;
@@ -359,24 +327,24 @@ static CTNetworkManager *_manager = nil;
 #pragma mark - cache method -
 - (void)readCacheWithRequest:(CTBaseRequest *)request completion:(void (^)(CTBaseRequest *request, id responseObject))completionBlock
 {
-//    __weak CTNetworkManager *weakManager = self;
-//    NSString *cacheKey = CTKeyFromRequestAndBaseURL(request, self.baseURL);
-//    [self.cache queryCacheForKey:cacheKey completion:^(NSData *data) {
-//        dispatch_async(weakManager.dataHandleQueue, ^{
-//            //解析数据
-//            id responseObject = CTParseJsonData(data);
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                if(completionBlock) {
-//                    completionBlock(request, responseObject);
-//                }
-//            });
-//        });
-//    }];
+    __weak CTNetworkManager *weakManager = self;
+    NSString *cacheKey = CTKeyFromRequestAndBaseURL(request.parametersDic, self.baseURL, request.interface);
+    [self.cache queryCacheForKey:cacheKey completion:^(NSData *data) {
+        dispatch_async(weakManager.dataHandleQueue, ^{
+            //解析数据
+            id responseObject = CTParseJsonData(data);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(completionBlock) {
+                    completionBlock(request, responseObject);
+                }
+            });
+        });
+    }];
 }
 
 - (void)cacheResponseData:(NSData *)responseData request:(CTBaseRequest *)request{
     //缓存数据
-//    [self.cache storeData:responseData forKey:CTKeyFromRequestAndBaseURL(request, self.baseURL)];
+    [self.cache storeData:responseData forKey:CTKeyFromRequestAndBaseURL(request.parametersDic, self.baseURL, request.interface)];
 }
 
 #pragma mark - set method
@@ -426,8 +394,8 @@ static CTNetworkManager *_manager = nil;
 - (void)networkSuccess:(CTBaseRequest *)request
                   task:(NSURLSessionDataTask *)task
           responseData:(NSData *)responseData
-               success:(CTSuccessCompletionBlock)successCompletionBlock
-               failure:(CTBusinessFailureBlock)businessFailureBlock
+               success:(CTNetworkSuccessBlock)successBlock
+               failure:(CTNetworkFailureBlock)failureBlock
 {
     //remove temp request
     [self removeTempRequest:request];
@@ -438,15 +406,16 @@ static CTNetworkManager *_manager = nil;
         //解析数据
         id responseObject = CTParseJsonData(decryptData);
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(responseObject && [self.configuration shouldBusinessSuccessWithResponseData:responseObject task:task request:request]) {
+            if(responseObject) {
                 if([self.configuration shouldCacheResponseData:responseObject task:task request:request]) {
                     //缓存解密之后的数据
                     [self cacheResponseData:decryptData request:request];
                 }
                 //成功回调
-                [self success:request responseObject:responseObject completion:successCompletionBlock];
+                [self success:request responseObject:responseObject completion:successBlock isFromCache:NO];
             }else {
-                [self businessFailure:request response:responseObject completion:businessFailureBlock];
+                NSError * error = [NSError errorWithDomain:@"CTNetwork error" code:1000 userInfo:nil];
+                [self failure:request error:error completion:failureBlock];
             }
         });
     });
@@ -455,7 +424,9 @@ static CTNetworkManager *_manager = nil;
 
 - (void)success:(CTBaseRequest *)request
  responseObject:(id)responseObject
-     completion:(CTSuccessCompletionBlock)successCompletionBlock{
+     completion:(CTNetworkSuccessBlock)successCompletionBlock
+    isFromCache:(BOOL)isFromCache
+{
     dispatch_async(self.dataHandleQueue, ^{
         id resultObject = nil;
         @try {
@@ -464,10 +435,12 @@ static CTNetworkManager *_manager = nil;
         }
         @catch (NSException *exception) {
             //崩溃则删除对应的缓存数据
-            [self.cache removeCacheForKey:CTKeyFromRequestAndBaseURL(request, self.baseURL)];
+            [self.cache removeCacheForKey:CTKeyFromRequestAndBaseURL(request.parametersDic, self.baseURL, request.interface)];
         }
         @finally {
+            
         }
+        request.isFromCache = isFromCache;
         //成功回调
         dispatch_async(dispatch_get_main_queue(), ^{
             if(successCompletionBlock) {
@@ -478,27 +451,15 @@ static CTNetworkManager *_manager = nil;
 }
 
 /**
- *  网络成功，业务失败
- */
-- (void)businessFailure:(CTBaseRequest *)request response:(id)response completion:(CTNetworkFailureBlock)businessFailureBlock
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(businessFailureBlock) {
-            businessFailureBlock(request, response);
-        }
-    });
-}
-
-/**
  *  网络失败
  */
-- (void)networkFailure:(CTBaseRequest *)request error:(NSError *)error completion:(CTNetworkFailureBlock)networkFailureBlock
+- (void)failure:(CTBaseRequest *)request error:(NSError *)error completion:(CTNetworkFailureBlock)failureBlock
 {
     //remove temp request
     [self removeTempRequest:request];
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(networkFailureBlock) {
-            networkFailureBlock(request, error);
+        if(failureBlock) {
+            failureBlock(request, error);
         }
     });
 }
@@ -509,7 +470,7 @@ static CTNetworkManager *_manager = nil;
  */
 - (void)removeTempRequest:(CTBaseRequest *)request
 {
-    NSString *requestKey = [[NSURL URLWithString:request.methodName relativeToURL:self.baseURL] absoluteString];
+    NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
     [self.tempRequestDic removeObjectForKey:requestKey];
 }
 

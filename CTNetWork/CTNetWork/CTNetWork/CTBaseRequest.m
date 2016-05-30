@@ -10,7 +10,7 @@
 #import "CTNetworkManager.h"
 #import <objc/runtime.h>
 
-static const char * CTNetworkRequestMethodNameKey = "CTNetworkRequestMethodNameKey";
+
 static NSUInteger _requestIdentifier = 0;
 
 @interface CTBaseRequest ()

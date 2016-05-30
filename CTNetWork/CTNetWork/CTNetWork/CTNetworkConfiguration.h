@@ -97,17 +97,6 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
  */
 - (BOOL)shouldCacheResponseData:(id _Nullable)responseData task:(NSURLSessionDataTask * _Nonnull)task request:(CTBaseRequest * _Nonnull)request;
 
-/**
- *  是否业务成功，默认返回YES；子类若是需要判断走业务失败和业务成功流程，可以覆写此方法
- *
- *  @param responseData 返回数据
- *  @param task         task
- *  @param request      请求
- *
- *  @return 默认返回YES，说明网络成功，则走成功流程；
- */
-- (BOOL)shouldBusinessSuccessWithResponseData:(id _Nullable)responseData task:(NSURLSessionDataTask * _Nonnull)task request:(CTBaseRequest * _Nonnull)request;
-
 @end
 
 
