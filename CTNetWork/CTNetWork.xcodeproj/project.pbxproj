@@ -14,6 +14,8 @@
 		0B117C601CFB2A030092D268 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0B117C5F1CFB2A030092D268 /* Assets.xcassets */; };
 		0B117C631CFB2A030092D268 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0B117C611CFB2A030092D268 /* LaunchScreen.storyboard */; };
 		0B117C6E1CFB2A030092D268 /* CTNetWorkTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B117C6D1CFB2A030092D268 /* CTNetWorkTests.m */; };
+		49BA00008E07969FBE979B0C /* libPods-CTNetWork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B3A645697AF1DD29A61E5B /* libPods-CTNetWork.a */; };
+		843F15C31CFC1F7E00CE4A19 /* CTHTTPSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,11 @@
 		0B117C691CFB2A030092D268 /* CTNetWorkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CTNetWorkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B117C6D1CFB2A030092D268 /* CTNetWorkTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTNetWorkTests.m; sourceTree = "<group>"; };
 		0B117C6F1CFB2A030092D268 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHTTPSessionManager.h; sourceTree = "<group>"; };
+		843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHTTPSessionManager.m; sourceTree = "<group>"; };
+		A5B3A645697AF1DD29A61E5B /* libPods-CTNetWork.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CTNetWork.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB36B9F90714C2A71D663707 /* Pods-CTNetWork.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CTNetWork.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork.debug.xcconfig"; sourceTree = "<group>"; };
+		F8CE4DA1D8B846C1EA30E5B4 /* Pods-CTNetWork.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CTNetWork.release.xcconfig"; path = "Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49BA00008E07969FBE979B0C /* libPods-CTNetWork.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +74,8 @@
 				0B117C521CFB2A030092D268 /* CTNetWork */,
 				0B117C6C1CFB2A030092D268 /* CTNetWorkTests */,
 				0B117C511CFB2A030092D268 /* Products */,
+				B06ACBE3E76C4A65C775CDDD /* Pods */,
+				31DE55FAF73786DE84E7D3D7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -81,6 +91,7 @@
 		0B117C521CFB2A030092D268 /* CTNetWork */ = {
 			isa = PBXGroup;
 			children = (
+				843F15C01CFC1E7200CE4A19 /* CTNetWork */,
 				0B117C561CFB2A030092D268 /* AppDelegate.h */,
 				0B117C571CFB2A030092D268 /* AppDelegate.m */,
 				0B117C591CFB2A030092D268 /* ViewController.h */,
@@ -111,6 +122,32 @@
 			path = CTNetWorkTests;
 			sourceTree = "<group>";
 		};
+		31DE55FAF73786DE84E7D3D7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A5B3A645697AF1DD29A61E5B /* libPods-CTNetWork.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		843F15C01CFC1E7200CE4A19 /* CTNetWork */ = {
+			isa = PBXGroup;
+			children = (
+				843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */,
+				843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */,
+			);
+			path = CTNetWork;
+			sourceTree = "<group>";
+		};
+		B06ACBE3E76C4A65C775CDDD /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CB36B9F90714C2A71D663707 /* Pods-CTNetWork.debug.xcconfig */,
+				F8CE4DA1D8B846C1EA30E5B4 /* Pods-CTNetWork.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -118,9 +155,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0B117C721CFB2A030092D268 /* Build configuration list for PBXNativeTarget "CTNetWork" */;
 			buildPhases = (
+				9A14EA942A648BA624061CCC /* 📦 Check Pods Manifest.lock */,
 				0B117C4C1CFB2A030092D268 /* Sources */,
 				0B117C4D1CFB2A030092D268 /* Frameworks */,
 				0B117C4E1CFB2A030092D268 /* Resources */,
+				F70F7FDF40B6293FE7071CC1 /* 📦 Embed Pods Frameworks */,
+				859B344988733831CA858068 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -208,6 +248,54 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		859B344988733831CA858068 /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9A14EA942A648BA624061CCC /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		F70F7FDF40B6293FE7071CC1 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CTNetWork/Pods-CTNetWork-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0B117C4C1CFB2A030092D268 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -216,6 +304,7 @@
 				0B117C5B1CFB2A030092D268 /* ViewController.m in Sources */,
 				0B117C581CFB2A030092D268 /* AppDelegate.m in Sources */,
 				0B117C551CFB2A030092D268 /* main.m in Sources */,
+				843F15C31CFC1F7E00CE4A19 /* CTHTTPSessionManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +430,7 @@
 		};
 		0B117C731CFB2A030092D268 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CB36B9F90714C2A71D663707 /* Pods-CTNetWork.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = CTNetWork/Info.plist;
@@ -352,6 +442,7 @@
 		};
 		0B117C741CFB2A030092D268 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F8CE4DA1D8B846C1EA30E5B4 /* Pods-CTNetWork.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = CTNetWork/Info.plist;
@@ -404,6 +495,7 @@
 				0B117C741CFB2A030092D268 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0B117C751CFB2A030092D268 /* Build configuration list for PBXNativeTarget "CTNetWorkTests" */ = {
 			isa = XCConfigurationList;
@@ -412,6 +504,7 @@
 				0B117C771CFB2A030092D268 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
