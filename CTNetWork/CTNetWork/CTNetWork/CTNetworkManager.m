@@ -187,27 +187,24 @@ static CTNetworkManager *_manager = nil;
 //}
 
 #pragma mark - upload request
-//- (void)sendUploadRequest:(CTUploadRequest *)request
-//                 progress:(void (^)(NSProgress * _Nonnull))uploadProgress
-//                  success:(CTSuccessCompletionBlock)successCompletionBlock
-//          businessFailure:(CTBusinessFailureBlock)businessFailureBlock
-//           networkFailure:(CTNetworkFailureBlock)networkFailureBlock {
-//    
-//    [self.httpClient POST:request.methodName parameters:request.parametersDic constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-//        
-//        [formData appendPartWithFileData:request.fileData name:request.uploadKey fileName:request.fileName mimeType:request.mimeType];
-//        
-//    } progress:uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
-//        
-//        [self networkSuccess:request task:task responseData:responseObject success:successCompletionBlock businessFailure:businessFailureBlock];
-//        
-//    } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nullable error) {
-//        
-//        [self networkFailure:request error:error completion:networkFailureBlock];
-//        
-//    }];
-//}
-//
+- (void)sendUploadRequest:(CTBaseRequest *)request
+                 progress:(void (^)(NSProgress * _Nonnull))uploadProgress
+                  success:(CTNetworkSuccessBlock)successBlock
+                  failure:(CTNetworkFailureBlock)failureBlock {
+    NSString * url = [self buildRequestUrl:request];
+    request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        
+        [formData appendPartWithFileData:request.fileData name:request.uploadKey fileName:request.fileName mimeType:request.mimeType];
+        
+    } progress:uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
+        
+        [self networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
+        
+    } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nullable error) {
+        [self failure:request error:error completion:failureBlock];
+    }];
+}
+
 - (void)sendRequest:(CTBaseRequest *)request
             success:(CTNetworkSuccessBlock)successBlock
             failure:(CTNetworkFailureBlock)failureBlock
@@ -322,7 +319,6 @@ static CTNetworkManager *_manager = nil;
     // filter url
     return [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
 }
-
 
 #pragma mark - cache method -
 - (void)readCacheWithRequest:(CTBaseRequest *)request completion:(void (^)(CTBaseRequest *request, id responseObject))completionBlock

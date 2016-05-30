@@ -57,21 +57,20 @@
  *
  *  @param request                下载请求
  *  @param downloadProgressBlock  下载的进度条
- *  @param successCompletionBlock 下载成功
- *  @param failureCompletionBlock 下载失败
+ *  @param successBlock 下载成功
+ *  @param failureBlock 下载失败
  */
-//- (void)sendDownloadRequest:(BGDownloadRequest * _Nonnull)request
-//                   progress:(nullable void (^)(NSProgress * _Nonnull downloadProgress)) downloadProgressBlock
-//                    success:(nullable void (^)(BGDownloadRequest * _Nonnull request, NSURL * _Nullable filePath))successCompletionBlock
-//                    failure:(nullable void (^)(BGDownloadRequest * _Nonnull request, NSError * _Nullable error))failureCompletionBlock;
-//
-//
-//- (void)sendUploadRequest:(BGUploadRequest * _Nonnull)request
-//                 progress:(nullable void (^)(NSProgress * _Nonnull uploadProgress)) uploadProgress
-//                  success:(BGSuccessCompletionBlock _Nullable)successCompletionBlock
-//          businessFailure:(BGBusinessFailureBlock _Nullable)businessFailureBlock
-//           networkFailure:(BGNetworkFailureBlock _Nullable)networkFailureBlock;
-//
+- (void)sendDownloadRequest:(CTBaseRequest * _Nonnull)request
+                   progress:(nullable void (^)(NSProgress * _Nonnull downloadProgress)) downloadProgressBlock
+                    success:(nullable void (^)(CTBaseRequest * _Nonnull request, NSURL * _Nullable filePath))successBlock
+                    failure:(nullable void (^)(CTBaseRequest * _Nonnull request, NSError * _Nullable error))failureBlock;
+
+
+- (void)sendUploadRequest:(CTBaseRequest * _Nonnull)request
+                 progress:(nullable void (^)(NSProgress * _Nonnull uploadProgress))uploadProgress
+                  success:(CTNetworkSuccessBlock _Nullable)successBlock
+                  failure:(CTNetworkFailureBlock _Nullable)networkBlock;
+
 
 /**
  *  取消请求
