@@ -357,8 +357,12 @@ static CTNetworkManager *_manager = nil;
 {
     NSParameterAssert(configuration);
     NSParameterAssert(configuration.baseURLString);
+    
+    NSURLSessionConfiguration * sessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    sessionConfiguration.timeoutIntervalForRequest = configuration.timeInterval;
+    
     // CTHTTPSessionManager
-    _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
+    _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString] sessionConfiguration:sessionConfiguration];
     AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
     //是否允许CA不信任的证书通过
     policy.allowInvalidCertificates = YES;

@@ -40,7 +40,6 @@ static NSUInteger _requestIdentifier = 0;
         _mutableParametersDic = [[NSMutableDictionary alloc] init];
         self.requestMethod = CTNetworkRequestHTTPGet;
         self.cachePolicy = CTNetworkRquestCacheNone;
-        self.methodName = self.interface;
     }
     return self;
 }

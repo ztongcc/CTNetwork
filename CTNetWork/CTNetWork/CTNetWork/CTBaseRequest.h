@@ -84,7 +84,7 @@ typedef void(^   CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSErr
 /**
  *  方法名
  */
-@property (nonatomic, strong) NSString * _Nonnull interface;
+@property (nonatomic, copy) NSString * _Nonnull interface;
 /**
  *  是否来源于缓存
  */

@@ -97,6 +97,10 @@
 @end
 
 @interface CTNetworkConfiguration : NSObject<CTNetworkConfiguration>
+/**
+ *  超时时间
+ */
+@property (nonatomic, assign) NSTimeInterval timeInterval;
 
 + (instancetype _Nonnull)configuration;
 + (instancetype _Nonnull)configurationWithBaseURL:(NSString * _Nonnull)baseURL;
