@@ -50,6 +50,7 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
     CTNetworkRequestCacheDataAndReadCacheLoadData,
 };
 
+typedef void(^CTMultipartFormData) (id<AFMultipartFormData>  _Nonnull formData);
 #pragma mark - completion block
 typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable response);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
@@ -107,6 +108,16 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
  *  缓存策略，默认为CTNetworkRquestCacheNone
  */
 @property (nonatomic, assign) CTNetworkRequestCachePolicy cachePolicy;
+
+/**
+ *  上传文件时使用
+ */
+@property (nonatomic, copy)CTMultipartFormData _Nonnull formData;
+
+/**
+ *  下载文件时使用
+ */
+@property (nonatomic, copy) NSString * _Nonnull fileName;
 
 /**
  *  参数字典

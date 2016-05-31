@@ -81,14 +81,14 @@ inline NSString * const CTKeyFromParamsAndURLString(NSDictionary *paramDic, NSSt
     return CT_MD5(keyMutableString);
 }
 
-inline NSString * CTURLStringFromBaseURLAndMethod(NSURL *baseURL, NSString * interface)
+inline NSString * const CTURLStringFromBaseURLAndInterface(NSURL *baseURL, NSString * interface)
 {
     return [[NSURL URLWithString:interface relativeToURL:baseURL] absoluteString];
 }
 
 inline NSString * const CTKeyFromRequestAndBaseURL(NSDictionary *paramDic, NSURL *baseURL, NSString * interface)
 {
-    return CTKeyFromParamsAndURLString(paramDic, CTURLStringFromBaseURLAndMethod(baseURL, interface));
+    return CTKeyFromParamsAndURLString(paramDic, CTURLStringFromBaseURLAndInterface(baseURL, interface));
 }
 
 

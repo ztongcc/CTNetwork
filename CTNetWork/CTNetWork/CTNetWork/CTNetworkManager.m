@@ -61,130 +61,132 @@ static CTNetworkManager *_manager = nil;
 }
 
 
-//#pragma makr - download request
-//- (void)sendDownloadRequest:(CTDownloadRequest *)request
-//                   progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
-//                    success:(void (^)(CTDownloadRequest * _Nonnull, NSURL * _Nullable))successCompletionBlock
-//                    failure:(void (^)(CTDownloadRequest * _Nonnull, NSError * _Nullable))failureCompletionBlock {
-//    
-//    NSString *requestURLString = CTURLStringFromBaseURLAndMethod(self.baseURL, request.methodName);
-//    NSString *fileName = [self downloadRequestFileName:request];
-//    
-//    [self.cache queryDiskCacheForFileName:fileName completion:^(id  _Nullable object) {
-//        //有缓存，则直接返回
-//        if([object isKindOfClass:[NSData class]]) {
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
-//                //保存文件
-//                if(successCompletionBlock) {
-//                    successCompletionBlock(request, filePath);
-//                }
-//            });
-//        }
-//        else {
-//            [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName progress:downloadProgressBlock success:successCompletionBlock failure:failureCompletionBlock];
-//        }
-//    }];
-//}
-//
-//- (void)downloadDataWithRequest:(CTDownloadRequest *)request
-//                     requestURL:(NSString *)requestURLString
-//                       fileName:(NSString *)fileName
-//                       progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
-//                        success:(void (^)(CTDownloadRequest * _Nonnull, NSURL * _Nullable))successCompletionBlock
-//                        failure:(void (^)(CTDownloadRequest * _Nonnull, NSError * _Nullable))failureCompletionBlock {
-//    
-//    NSString *resumeDataFileName = [NSString stringWithFormat:@"%@_resume", fileName];
-//    [self.cache queryDiskCacheForFileName:resumeDataFileName completion:^(id  _Nullable object) {
-//        //有数据，断点续传
-//        if([object isKindOfClass:[NSData class]]) {
-//            NSURLSessionDownloadTask *task = [self.httpClient downloadTaskWithResumeData:object progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-//                //4xx客户端错误
-//                //5xx服务器错误
-//                //2xx请求成功
-//                //3xx重定向
-//                if(((NSHTTPURLResponse *) response).statusCode >= 400) {
-//                    return targetPath;
-//                }
-//                else {
-//                    return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
-//                }
-//            } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-//                if(error == nil) {
-//                    //删除断点续传文件
-//                    [self.cache removeCacheForFileName:resumeDataFileName];
-//                }
-//                self.tempDownloadTaskDic[requestURLString] = nil;
-//                [self resultWithDownloadRequest:request filePath:filePath error:error success:successCompletionBlock failure:failureCompletionBlock];
-//            }];
-//            
-//            [task resume];
-//            //save
-//            self.tempDownloadTaskDic[requestURLString] = task;
-//            
-//        }
-//        else {
-//            //无缓存，则重新下载
-//            NSMutableURLRequest *httpRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:requestURLString]];
-//            NSURLSessionDownloadTask *task = [self.httpClient downloadTaskWithRequest:httpRequest progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-//                
-//                if(((NSHTTPURLResponse *) response).statusCode >= 400) {
-//                    return targetPath;
-//                }
-//                else {
-//                    return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
-//                }
-//                
-//            } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-//                //清空task
-//                self.tempDownloadTaskDic[requestURLString] = nil;
-//                [self resultWithDownloadRequest:request filePath:filePath error:error success:successCompletionBlock failure:failureCompletionBlock];
-//                
-//            }];
-//            
-//            [task resume];
-//            //save
-//            self.tempDownloadTaskDic[requestURLString] = task;
-//        }
-//    }];
-//}
-//
-//- (void)resultWithDownloadRequest:(CTDownloadRequest *)request
-//                         filePath:(NSURL *)filePath
-//                            error:(NSError *)error
-//                          success:(void (^)(CTDownloadRequest * _Nonnull, NSURL * _Nullable))successCompletionBlock
-//                          failure:(void (^)(CTDownloadRequest * _Nonnull, NSError * _Nullable))failureCompletionBlock {
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        if(error) {
-//            if(failureCompletionBlock) {
-//                failureCompletionBlock(request, error);
-//            }
-//        }
-//        else {
-//            if(successCompletionBlock) {
-//                successCompletionBlock(request, filePath);
-//            }
-//        }
-//    });
-//}
+#pragma makr - download request
+- (void)sendDownloadRequest:(CTBaseRequest *)request
+                   progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
+                    success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
+                    failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock
+{
+    
+    NSString * requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
+    NSString * fileName = [self downloadRequestFileName:request];
+    
+    [self.cache queryDiskCacheForFileName:fileName completion:^(id  _Nullable object) {
+        //有缓存，则直接返回
+        if([object isKindOfClass:[NSData class]]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
+                //保存文件
+                if(successBlock) {
+                    successBlock(request, filePath);
+                }
+            });
+        }
+        else {
+            [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName progress:downloadProgressBlock success:successBlock failure:failureBlock];
+        }
+    }];
+}
+
+- (void)downloadDataWithRequest:(CTBaseRequest *)request
+                     requestURL:(NSString *)requestURLString
+                       fileName:(NSString *)fileName
+                       progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
+                        success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
+                        failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock {
+    
+    NSString *resumeDataFileName = [NSString stringWithFormat:@"%@_resume", fileName];
+    [self.cache queryDiskCacheForFileName:resumeDataFileName completion:^(id  _Nullable object) {
+        //有数据，断点续传
+        if([object isKindOfClass:[NSData class]]) {
+            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithResumeData:object progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                //4xx 客户端错误
+                //5xx 服务器错误
+                //2xx 请求成功
+                //3xx 重定向
+                if(((NSHTTPURLResponse *) response).statusCode >= 400) {
+                    return targetPath;
+                }
+                else {
+                    return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
+                }
+            } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                if(error == nil) {
+                    //删除断点续传文件
+                    [self.cache removeCacheForFileName:resumeDataFileName];
+                }
+                self.tempDownloadTaskDic[requestURLString] = nil;
+                [self resultWithDownloadRequest:request filePath:filePath error:error success:successBlock failure:failureBlock];
+            }];
+            
+            [task resume];
+            //save
+            self.tempDownloadTaskDic[requestURLString] = task;
+            
+        }else {
+            //无缓存，则重新下载
+            NSMutableURLRequest *httpRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:requestURLString]];
+            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithRequest:httpRequest progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                
+                if(((NSHTTPURLResponse *) response).statusCode >= 400) {
+                    return targetPath;
+                }
+                else {
+                    return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
+                }
+
+            } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                //清空task
+                self.tempDownloadTaskDic[requestURLString] = nil;
+                [self resultWithDownloadRequest:request filePath:filePath error:error success:successBlock failure:failureBlock];
+                
+            }];
+            
+            [task resume];
+            //save
+            self.tempDownloadTaskDic[requestURLString] = task;
+        }
+    }];
+}
+
+- (void)resultWithDownloadRequest:(CTBaseRequest *)request
+                         filePath:(NSURL *)filePath
+                            error:(NSError *)error
+                          success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
+                          failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(error) {
+            if(failureBlock) {
+                failureBlock(request, error);
+            }
+        }
+        else {
+            if(successBlock) {
+                successBlock(request, filePath);
+            }
+        }
+    });
+}
 
 /**
  *  下载请求的文件名
  */
-//- (NSString *)downloadRequestFileName:(CTDownloadRequest *)request {
-//    NSString *requestURLString = CTURLStringFromBaseURLAndMethod(self.baseURL, request.methodName);
-//    NSString *cacheKey = CT_MD5(requestURLString);
-//    NSString *pathExtension = [request.fileName pathExtension];
-//    NSString *fileName =  pathExtension ? [cacheKey stringByAppendingPathExtension:pathExtension] : [cacheKey stringByAppendingPathExtension:@"tmp"];
-//    return fileName;
-//}
+- (NSString *)downloadRequestFileName:(CTBaseRequest *)request
+{
+    NSString *requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
+    NSString *cacheKey = CT_MD5(requestURLString);
+    NSString *pathExtension = [request.fileName pathExtension];
+    NSString *fileName =  pathExtension ? [cacheKey stringByAppendingPathExtension:pathExtension] : [cacheKey stringByAppendingPathExtension:@"tmp"];
+    return fileName;
+}
 
 /**
  *  断点续传的文件名，在下载文件名后面多了一个_resume
  */
-//- (NSString *)downloadRequestResumeDataFileName:(CTDownloadRequest *)request {
-//    return [NSString stringWithFormat:@"%@_resume", [self downloadRequestFileName:request]];
-//}
+- (NSString *)downloadRequestResumeDataFileName:(CTBaseRequest *)request
+{
+    return [NSString stringWithFormat:@"%@_resume", [self downloadRequestFileName:request]];
+}
 
 #pragma mark - upload request
 - (void)sendUploadRequest:(CTBaseRequest *)request
@@ -192,11 +194,7 @@ static CTNetworkManager *_manager = nil;
                   success:(CTNetworkSuccessBlock)successBlock
                   failure:(CTNetworkFailureBlock)failureBlock {
     NSString * url = [self buildRequestUrl:request];
-    request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-        
-        [formData appendPartWithFileData:request.fileData name:request.uploadKey fileName:request.fileName mimeType:request.mimeType];
-        
-    } progress:uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
+    request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic constructingBodyWithBlock:request.formData progress:uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
         
         [self networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
         
@@ -306,8 +304,6 @@ static CTNetworkManager *_manager = nil;
         default:
             break;
     }
-    
-    [request.sessionTask resume];
 }
 
 - (NSString *)buildRequestUrl:(CTBaseRequest *)request
@@ -476,56 +472,58 @@ static CTNetworkManager *_manager = nil;
     [self.sessionManager cancelTaskWithUrl:url];
 }
 
-//- (void)cancelDownloadRequest:(CTDownloadRequest *)request {
-//    NSString *requestURLString = [[NSURL URLWithString:request.methodName relativeToURL:self.baseURL] absoluteString];
-//    NSURLSessionDownloadTask *task = self.tempDownloadTaskDic[requestURLString];
-//    [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-//        NSString *resumeDataFileName = [self downloadRequestResumeDataFileName:request];
-//        //缓存，以用来断点续传
-//        [self.cache storeData:resumeData forFileName:resumeDataFileName];
-//        //不保存
-//        self.tempDownloadTaskDic[requestURLString] = nil;
-//    }];
-//}
+- (void)cancelDownloadRequest:(CTBaseRequest *)request
+{
+    NSString *requestURLString = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
+    NSURLSessionDownloadTask *task = self.tempDownloadTaskDic[requestURLString];
+    [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+        NSString *resumeDataFileName = [self downloadRequestResumeDataFileName:request];
+        //缓存，以用来断点续传
+        [self.cache storeData:resumeData forFileName:resumeDataFileName];
+        //不保存
+        self.tempDownloadTaskDic[requestURLString] = nil;
+    }];
+}
 
 #pragma mark - CTAFRequestSerializerDelegate
-//- (NSURLRequest *)requestSerializer:(CTAFRequestSerializer *)requestSerializer request:(NSURLRequest *)request withParameters:(id)parameters error:(NSError *__autoreleasing *)error{
-//    NSParameterAssert(request);
-//    // NOTE:MutableRequest
-//    NSMutableURLRequest *mutableRequest = [request mutableCopy];
-//    
-//    // NOTE:RequestHeader
-//    //取出请求
-//    CTBaseRequest *networkRequest = self.tempRequestDic[request.URL.absoluteString];
-//    NSDictionary *httpRequestHeaderDic = [self.configuration requestHTTPHeaderFields:networkRequest];
-//    [httpRequestHeaderDic enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
-//        if (![request valueForHTTPHeaderField:field]) {
-//            [mutableRequest setValue:value forHTTPHeaderField:field];
-//        }
-//    }];
-//    
-//    if (![mutableRequest valueForHTTPHeaderField:@"Content-Type"]) {
-//        [mutableRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-//    }
-//    
-//    //NOTE:URL QueryString
-//    NSString *queryString = [self.configuration queryStringForURLWithRequest:networkRequest];
-//    if(queryString){
-//        mutableRequest.URL = [NSURL URLWithString:[[mutableRequest.URL absoluteString] stringByAppendingFormat:mutableRequest.URL.query ? @"&%@" : @"?%@", queryString]];
-//    }
-//    
-//    //NOTE:HTTP GET or POST method
-//    if ([requestSerializer.HTTPMethodsEncodingParametersInURI containsObject:[[request HTTPMethod] uppercaseString]]) {
-//        //GET请求
-//    }else{
-//        //NOTE:HTTP Body Data
-//        NSData *bodyData = [self.configuration httpBodyDataWithRequest:networkRequest];
-//        if(bodyData){
-//            [mutableRequest setHTTPBody:bodyData];
-//        }
-//    }
-//    
-//    return [mutableRequest copy];
-//}
+- (NSURLRequest *)requestSerializer:(AFRequestSerializer *)requestSerializer request:(NSURLRequest *)request withParameters:(id)parameters error:(NSError *__autoreleasing *)error
+{
+    NSParameterAssert(request);
+    // NOTE:MutableRequest
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    
+    // NOTE:RequestHeader
+    //取出请求
+    CTBaseRequest *networkRequest = self.tempRequestDic[request.URL.absoluteString];
+    NSDictionary *httpRequestHeaderDic = [self.configuration requestHTTPHeaderFields:networkRequest];
+    [httpRequestHeaderDic enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
+        if (![request valueForHTTPHeaderField:field]) {
+            [mutableRequest setValue:value forHTTPHeaderField:field];
+        }
+    }];
+    
+    if (![mutableRequest valueForHTTPHeaderField:@"Content-Type"]) {
+        [mutableRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    }
+    
+    //NOTE:URL QueryString
+    NSString *queryString = [self.configuration queryStringForURLWithRequest:networkRequest];
+    if(queryString){
+        mutableRequest.URL = [NSURL URLWithString:[[mutableRequest.URL absoluteString] stringByAppendingFormat:mutableRequest.URL.query ? @"&%@" : @"?%@", queryString]];
+    }
+    
+    //NOTE:HTTP GET or POST method
+    if ([requestSerializer.HTTPMethodsEncodingParametersInURI containsObject:[[request HTTPMethod] uppercaseString]]) {
+        //GET请求
+    }else{
+        //NOTE:HTTP Body Data
+        NSData *bodyData = [self.configuration httpBodyDataWithRequest:networkRequest];
+        if(bodyData){
+            [mutableRequest setHTTPBody:bodyData];
+        }
+    }
+    
+    return [mutableRequest copy];
+}
 
 @end
