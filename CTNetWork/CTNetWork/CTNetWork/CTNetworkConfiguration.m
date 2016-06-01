@@ -35,7 +35,9 @@
     return _baseURLString;
 }
 
-- (void)preProcessingRequest:(CTBaseRequest *)request {
+- (void)prepareProcessingRequest:(CTBaseRequest *)request
+{
+    
 }
 
 - (NSDictionary *)requestHTTPHeaderFields:(CTBaseRequest *)request {

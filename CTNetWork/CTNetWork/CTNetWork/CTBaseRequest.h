@@ -123,11 +123,12 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
  *  参数字典
  */
 @property (nonatomic, copy, readonly) NSDictionary * _Nonnull parametersDic;
-
 /**
  *  请求头
  */
 @property (nonatomic, copy, readonly) NSDictionary * _Nonnull requestHTTPHeaderFields;
+
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface;
 
 #pragma mark - 设置或获取请求头的内容
 - (void)setValue:(NSString * _Nonnull)value forHTTPHeaderField:(NSString * _Nonnull)field;

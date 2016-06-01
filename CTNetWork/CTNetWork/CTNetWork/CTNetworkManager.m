@@ -247,7 +247,7 @@ static CTNetworkManager *_manager = nil;
     self.tempRequestDic[requestKey] = request;
     
     NSString * url = [self buildRequestUrl:request];
-    
+    NSLog(@"CTRequest url %@", url);
     NSDictionary * headerFieldValueDictionary = request.requestHTTPHeaderFields;
     if (headerFieldValueDictionary != nil) {
         for (id httpHeaderField in headerFieldValueDictionary.allKeys) {
@@ -382,8 +382,6 @@ static CTNetworkManager *_manager = nil;
                success:(CTNetworkSuccessBlock)successBlock
                failure:(CTNetworkFailureBlock)failureBlock
 {
-    //remove temp request
-    [self removeTempRequest:request];
     
     dispatch_async(self.dataHandleQueue, ^{
         //对数据进行解密
@@ -405,6 +403,8 @@ static CTNetworkManager *_manager = nil;
         });
     });
     
+    //remove temp request
+    [self removeTempRequest:request];
 }
 
 - (void)success:(CTBaseRequest *)request

@@ -30,16 +30,26 @@ static NSUInteger _requestIdentifier = 0;
 
 - (void)dealloc
 {
-        NSLog(@"%@ [-%ld-] delloc, ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
+        NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
 }
 
-- (instancetype)init{
+- (instancetype)init
+{
     if(self = [super init]){
         _requestIdentifier += 1;
         _mutableRequestHTTPHeaderFields = [[NSMutableDictionary alloc] init];
         _mutableParametersDic = [[NSMutableDictionary alloc] init];
         self.requestMethod = CTNetworkRequestHTTPGet;
         self.cachePolicy = CTNetworkRquestCacheNone;
+    }
+    return self;
+}
+
+- (instancetype)initWithInterface:(NSString * _Nullable)interface
+{
+    self = [self init];
+    if (self) {
+        self.interface = interface;
     }
     return self;
 }
@@ -121,7 +131,7 @@ static NSUInteger _requestIdentifier = 0;
 - (NSString *)description
 {
     NSString *className = NSStringFromClass([self class]);
-    NSString *desStr = [NSString stringWithFormat:@"%@\n interface: [-%@-]\n param:\n%@", className, self.interface, self.parametersDic];
+    NSString *desStr = [NSString stringWithFormat:@"%@ indentifier %ld \n interface: [-  %@  -]\n param:\n%@\n", className,self.requestIdentifier, self.interface, self.parametersDic];
     return desStr;
 }
 @end

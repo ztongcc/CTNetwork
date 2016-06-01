@@ -49,6 +49,7 @@
 		0B117C6F1CFB2A030092D268 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0B117C781CFC77580092D268 /* CTUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTUtil.h; sourceTree = "<group>"; };
 		0B117C791CFC77580092D268 /* CTUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTUtil.m; sourceTree = "<group>"; };
+		0BBA66CB1CFF226B006A445A /* CTNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTNetwork.h; sourceTree = "<group>"; };
 		843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTHTTPSessionManager.h; sourceTree = "<group>"; };
 		843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTHTTPSessionManager.m; sourceTree = "<group>"; };
 		843F15C41CFC22B600CE4A19 /* CTBaseRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseRequest.h; sourceTree = "<group>"; };
@@ -148,6 +149,7 @@
 		843F15C01CFC1E7200CE4A19 /* CTNetWork */ = {
 			isa = PBXGroup;
 			children = (
+				0BBA66CB1CFF226B006A445A /* CTNetwork.h */,
 				843F15C11CFC1F7E00CE4A19 /* CTHTTPSessionManager.h */,
 				843F15C21CFC1F7E00CE4A19 /* CTHTTPSessionManager.m */,
 				843F15C41CFC22B600CE4A19 /* CTBaseRequest.h */,
