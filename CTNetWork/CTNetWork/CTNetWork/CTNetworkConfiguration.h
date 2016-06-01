@@ -51,26 +51,6 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 - (NSDictionary * _Nonnull)requestHTTPHeaderFields:(CTBaseRequest * _Nonnull)request;
 
 /**
- *  组装url的query部分，其中默认GET请求会将参数全部用&连接，但POST请求返回nil
- *
- *  @param request    请求，内部带有参数字典
- *
- *  @return 返回一个字符串
- */
-- (NSString * _Nullable)queryStringForURLWithRequest:(CTBaseRequest * _Nonnull)request;
-
-/**
- *  组装http请求体，默认GET请求返回nil,POST请求返回一个json对象
- *
- *  @param request    请求，内部带有参数字典
- *
- *  @return 返回一个NSData数据类型
- *
- *  @note 若是默认满足不了需求，请实现此方法；并且，若是需要加密，则可以在此请求当中处理
- */
-- (NSData * _Nullable)httpBodyDataWithRequest:(CTBaseRequest * _Nonnull)request;
-
-/**
  *  解密请求返回的数据，默认不解密，如果需要解密，实现此方法
  *
  *  @param responseData 返回的数据

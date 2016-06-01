@@ -7,6 +7,8 @@
 //
 
 #import "CTNetworkConfiguration.h"
+#import "CTUtil.h"
+
 
 @interface CTNetworkConfiguration ()
 
@@ -16,7 +18,8 @@
 
 @implementation CTNetworkConfiguration
 
-+ (instancetype)configuration{
++ (instancetype)configuration
+{
     return [self configurationWithBaseURL: @""];
 }
 
@@ -44,28 +47,6 @@
         allHTTPHeaderFileds[key] = obj;
     }];
     return allHTTPHeaderFileds;
-}
-
-//- (NSString *)queryStringForURLWithRequest:(CTBaseRequest *)request{
-//    if(request.httpMethod == BGNetworkRequestHTTPGet){
-//        return CTQueryStringFromParamDictionary(request.parametersDic);
-//    }
-//    else{
-//        return nil;
-//    }
-//}
-
-- (NSData *)httpBodyDataWithRequest:(CTBaseRequest *)request
-{
-    if(!request.parametersDic.count){
-        return nil;
-    }
-    NSError *error = nil;
-    NSData *httpBody = [NSJSONSerialization dataWithJSONObject:request.parametersDic options: (NSJSONWritingOptions)0 error:&error];
-    if(error){
-        return nil;
-    }
-    return httpBody;
 }
 
 - (NSData *)decryptResponseData:(NSData *)responseData response:(NSURLResponse *)response request:(CTBaseRequest *)request

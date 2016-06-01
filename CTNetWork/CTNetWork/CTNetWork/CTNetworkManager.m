@@ -355,13 +355,6 @@ static CTNetworkManager *_manager = nil;
     policy.validatesDomainName = YES;
     _sessionManager.securityPolicy = policy;
     
-    //请求的序列化器
-//    CTAFRequestSerializer *requestSerializer = [CTAFRequestSerializer serializer];
-//    requestSerializer.delegate = self;
-    
-    //响应的序列化器
-//    CTAFResponseSerializer *responseSerializer = [CTAFResponseSerializer serializer];
-    
     //设置
     if (configuration.requestType == CTRequestSerializerTypeJSON) {
         _sessionManager.requestSerializer = [AFJSONRequestSerializer serializer];
@@ -484,46 +477,4 @@ static CTNetworkManager *_manager = nil;
         self.tempDownloadTaskDic[requestURLString] = nil;
     }];
 }
-
-#pragma mark - CTAFRequestSerializerDelegate
-- (NSURLRequest *)requestSerializer:(AFRequestSerializer *)requestSerializer request:(NSURLRequest *)request withParameters:(id)parameters error:(NSError *__autoreleasing *)error
-{
-    NSParameterAssert(request);
-    // NOTE:MutableRequest
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    
-    // NOTE:RequestHeader
-    //取出请求
-    CTBaseRequest *networkRequest = self.tempRequestDic[request.URL.absoluteString];
-    NSDictionary *httpRequestHeaderDic = [self.configuration requestHTTPHeaderFields:networkRequest];
-    [httpRequestHeaderDic enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
-        if (![request valueForHTTPHeaderField:field]) {
-            [mutableRequest setValue:value forHTTPHeaderField:field];
-        }
-    }];
-    
-    if (![mutableRequest valueForHTTPHeaderField:@"Content-Type"]) {
-        [mutableRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    }
-    
-    //NOTE:URL QueryString
-    NSString *queryString = [self.configuration queryStringForURLWithRequest:networkRequest];
-    if(queryString){
-        mutableRequest.URL = [NSURL URLWithString:[[mutableRequest.URL absoluteString] stringByAppendingFormat:mutableRequest.URL.query ? @"&%@" : @"?%@", queryString]];
-    }
-    
-    //NOTE:HTTP GET or POST method
-    if ([requestSerializer.HTTPMethodsEncodingParametersInURI containsObject:[[request HTTPMethod] uppercaseString]]) {
-        //GET请求
-    }else{
-        //NOTE:HTTP Body Data
-        NSData *bodyData = [self.configuration httpBodyDataWithRequest:networkRequest];
-        if(bodyData){
-            [mutableRequest setHTTPBody:bodyData];
-        }
-    }
-    
-    return [mutableRequest copy];
-}
-
 @end
