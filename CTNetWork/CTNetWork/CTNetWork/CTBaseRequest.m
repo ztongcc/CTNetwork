@@ -128,13 +128,24 @@ static NSUInteger _requestIdentifier = 0;
 
 @implementation CTBaseRequest (CTNetworkManager)
 #pragma mark - class method
-//+ (void)cancelRequest
-//{
-//    [[CTNetworkManager sharedManager] cancelRequestWithUrl:[self getRequestMethodName]];
-//}
-//
-//- (void)sendRequestWithSuccess:(BGSuccessCompletionBlock)successCompletionBlock businessFailure:(BGBusinessFailureBlock)businessFailureBlock networkFailure:(BGNetworkFailureBlock)networkFailureBlock {
-//    [[BGNetworkManager sharedManager] sendRequest:self success:successCompletionBlock businessFailure:businessFailureBlock networkFailure:networkFailureBlock];
-//}
 
+- (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock
+                        failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    [[CTNetworkManager sharedManager] sendRequest:self success:successBlock failure:failureBlock];
+}
+
+- (void)startUploadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull uploadProgress))progressBlock
+                               success:(CTNetworkSuccessBlock _Nullable)successBlock
+                               failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    [[CTNetworkManager sharedManager] sendUploadRequest:self progress:progressBlock success:successBlock failure:failureBlock];
+}
+
+- (void)startDownloadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull downloadProgress))progressBlock
+                                 success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                 failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    [[CTNetworkManager sharedManager] sendDownloadRequest:self progress:progressBlock success:successBlock failure:failureBlock];
+}
 @end

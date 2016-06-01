@@ -143,10 +143,6 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
 
 #pragma mark - CTNetworkRequest(BGNetworkManager)
 @interface CTBaseRequest (BGNetworkManager)
-/**
- *  取消请求
- */
-+ (void)cancelRequest;
 
 /**
  *  发送网络请求
@@ -155,6 +151,31 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
  *  @param businessFailureBlock   业务失败回调
  *  @param networkFailureBlock    网络失败回调
  */
-- (void)sendRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successCompletionBlock
-                networkFailure:(CTNetworkFailureBlock _Nullable)networkFailureBlock;
+- (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock
+                        failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
+/**
+ *  发送上传数据网络请求
+ *
+ *  @param successCompletionBlock 成功回调
+ *  @param businessFailureBlock   业务失败回调
+ *  @param networkFailureBlock    网络失败回调
+ */
+- (void)startUploadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull uploadProgress))progressBlock
+                               success:(CTNetworkSuccessBlock _Nullable)successBlock
+                              failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
+/**
+ *  发送下载文件网络请求
+ *
+ *  @param successCompletionBlock 成功回调
+ *  @param businessFailureBlock   业务失败回调
+ *  @param networkFailureBlock    网络失败回调
+ */
+- (void)startDownloadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull downloadProgress))progressBlock
+
+                                 success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                 failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
+
 @end

@@ -14,11 +14,6 @@
 FOUNDATION_EXPORT NSString * const _Nonnull CT_MD5(NSString * _Nonnull value);
 
 /**
- *  生成queryString
- */
-FOUNDATION_EXPORT NSString * const _Nonnull CTQueryStringFromParamDictionary(NSDictionary * _Nonnull paramDic);
-
-/**
  *  由参数、方法名、URL生成一个唯一的key
  */
 FOUNDATION_EXPORT NSString * const _Nonnull CTKeyFromParamsAndURLString(NSDictionary * _Nullable paramDic, NSString * _Nonnull URLString);
