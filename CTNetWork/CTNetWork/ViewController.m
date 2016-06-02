@@ -44,7 +44,27 @@
 
 }
 
-- (void)didReceiveMemoryWarning {
+- (IBAction)touchAction:(UIButton *)sender
+{
+    
+}
+
+
+- (void)downloadRequestExample
+{
+    CTBaseRequest *request = [[CTBaseRequest alloc] initWithInterface:@"http://casetree.cn/web/test/download/CollectionViewPGforIOS.pdf?test=100"];
+    request.fileName = @"test.pdf";
+    [request startDownloadRequestWithProgress:^(NSProgress * _Nonnull downloadProgress) {
+        NSLog(@"总: %lld  下载:%lld", downloadProgress.totalUnitCount, downloadProgress.completedUnitCount);
+    } success:^(CTBaseRequest * _Nonnull request, id  _Nullable response) {
+        
+    } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
+        
+    }];
+}
+
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
