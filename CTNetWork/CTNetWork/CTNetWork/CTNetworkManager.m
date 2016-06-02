@@ -126,6 +126,7 @@ static CTNetworkManager *_manager = nil;
         }else {
             //无缓存，则重新下载
             NSMutableURLRequest *httpRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:requestURLString]];
+            [self setHttpRequestHeardFieldsWithRequest:request];
             NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithRequest:httpRequest progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
                 
                 if(((NSHTTPURLResponse *) response).statusCode >= 400) {
@@ -238,16 +239,8 @@ static CTNetworkManager *_manager = nil;
     }
 }
 
-- (void)startNetworkDataWithRequest:(CTBaseRequest *)request
-                            success:(CTNetworkSuccessBlock)successBlock
-                            failure:(CTNetworkFailureBlock)failureBlock
+- (void)setHttpRequestHeardFieldsWithRequest:(CTBaseRequest *)request
 {
-    //临时保存请求
-    NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
-    self.tempRequestDic[requestKey] = request;
-    
-    NSString * url = [self buildRequestUrl:request];
-    NSLog(@"CTRequest url %@", url);
     NSDictionary * headerFieldValueDictionary = request.requestHTTPHeaderFields;
     if (headerFieldValueDictionary != nil) {
         for (id httpHeaderField in headerFieldValueDictionary.allKeys) {
@@ -259,6 +252,20 @@ static CTNetworkManager *_manager = nil;
             }
         }
     }
+}
+
+- (void)startNetworkDataWithRequest:(CTBaseRequest *)request
+                            success:(CTNetworkSuccessBlock)successBlock
+                            failure:(CTNetworkFailureBlock)failureBlock
+{
+    //临时保存请求
+    NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
+    self.tempRequestDic[requestKey] = request;
+    
+    NSString * url = [self buildRequestUrl:request];
+    NSLog(@"CTRequest url %@", url);
+
+    [self setHttpRequestHeardFieldsWithRequest:request];
     
     //发送请求
     __weak CTNetworkManager *weakManager = self;
