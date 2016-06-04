@@ -50,7 +50,7 @@
 		0B117C6D1CFB2A030092D268 /* CTNetWorkTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CTNetWorkTests.m; sourceTree = "<group>"; };
 		0B117C6F1CFB2A030092D268 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BBA66CB1CFF226B006A445A /* CTNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CTNetwork.h; sourceTree = "<group>"; };
-		0BD6DC8A1D02BB4100A1C3F8 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = test.png; sourceTree = "<group>"; };
+		0BD6DC8A1D02BB4100A1C3F8 /* test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = test.png; path = CTNetWork/test.png; sourceTree = "<group>"; };
 		0BD6DC8E1D02DB1000A1C3F8 /* CTBaseBatchRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTBaseBatchRequest.h; sourceTree = "<group>"; };
 		0BD6DC8F1D02DB1000A1C3F8 /* CTBaseBatchRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTBaseBatchRequest.m; sourceTree = "<group>"; };
 		0BD6DC911D02F26E00A1C3F8 /* casetree.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = casetree.cer; sourceTree = "<group>"; };
@@ -114,6 +114,7 @@
 				843F15C01CFC1E7200CE4A19 /* CTNetWork */,
 				0B117C561CFB2A030092D268 /* AppDelegate.h */,
 				0B117C571CFB2A030092D268 /* AppDelegate.m */,
+				0BD6DC8A1D02BB4100A1C3F8 /* test.png */,
 				0B117C591CFB2A030092D268 /* ViewController.h */,
 				0B117C5A1CFB2A030092D268 /* ViewController.m */,
 				0B117C5C1CFB2A030092D268 /* Main.storyboard */,
@@ -167,7 +168,6 @@
 				843F15CB1CFC298300CE4A19 /* CTNetworkCache.m */,
 				843F15CD1CFC29C100CE4A19 /* CTNetworkConfiguration.h */,
 				843F15CE1CFC29C100CE4A19 /* CTNetworkConfiguration.m */,
-				0BD6DC8A1D02BB4100A1C3F8 /* test.png */,
 			);
 			path = CTNetWork;
 			sourceTree = "<group>";
