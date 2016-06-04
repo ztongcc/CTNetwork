@@ -1,4 +1,4 @@
-# CTNetWork
+# CTNetwork
 A network framework based on AFNetWorking 
 
 
@@ -8,7 +8,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 ##有哪些功能？
 * 支持统一设置baseURL
 * 提供对HTTP请求头的统一配置以及对特殊请求头配置
-* 支持对网络请求的数据进行缓存以及配置不同的缓存策略
+* 支持对网络请求的数据进行缓存以及配置不同的缓存策略(仅采用磁盘缓存)
 * 提供对Response解密的配置
 * 支持不同的缓存策略请求以及缓存有效期的设置
 * 扩展了批量发送请求
@@ -24,8 +24,6 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 * 配置baseURL
 * 对CTNetworkRequest进行预处理
 * 对请求统一设置请求头
-* 对请求设置query string
-* 组装POST请求的请求体
 * 对Response进行解密
 * 配置对某个请求是否缓存
 
