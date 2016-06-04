@@ -69,5 +69,11 @@
     }
 }
 
+- (void)cancle
+{
+    for (CTBaseRequest * request in _requestArray) {
+        [request.sessionTask cancel];
+    }
+}
 
 @end

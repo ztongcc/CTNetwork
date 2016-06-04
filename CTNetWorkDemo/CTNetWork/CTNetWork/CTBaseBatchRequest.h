@@ -37,5 +37,8 @@
                     failure:(void (^_Nullable)(CTBaseRequest * _Nonnull request, NSError * _Nullable error))failureBlock
                  completion:(void (^_Nullable)(CTBaseBatchRequest * _Nonnull request, BOOL isFinish))completionBlock;
 
-
+/**
+ *  取消网络请求
+ */
+- (void)cancle;
 @end

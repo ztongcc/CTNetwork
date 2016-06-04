@@ -182,6 +182,9 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
 
                                  success:(CTNetworkSuccessBlock _Nullable)successBlock
                                  failure:(CTNetworkFailureBlock _Nullable)failureBlock;
-
+/**
+ *  取消网络请求
+ */
+- (void)cancle;
 
 @end

@@ -158,4 +158,9 @@ static NSUInteger _requestIdentifier = 0;
 {
     [[CTNetworkManager sharedManager] sendDownloadRequest:self progress:progressBlock success:successBlock failure:failureBlock];
 }
+
+- (void)cancle
+{
+    [self.sessionTask cancel];
+}
 @end
