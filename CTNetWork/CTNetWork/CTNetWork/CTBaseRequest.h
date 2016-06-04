@@ -41,18 +41,23 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
      */
     CTNetworkRquestCacheNone,
     /**
-     *  请求到数据后缓存数据，读取缓存时如果有缓存则仅仅读取缓存，不再请求网络
+     *  如果有缓存则仅仅读取缓存，不再请求网络, 无缓存则请求网络，请求到数据后缓存数据
      */
     CTNetworkRequestCacheDataAndReadCacheOnly,
     /**
-     *  请求到数据后缓存数据，读取到缓存后请求网络
+     *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 (此情况只会走一次成功block, 即读取缓存成功调用一次)
+     */
+    CTNetworkRequestCacheDataAndRefreshCacheData,
+    /**
+     *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 （此情况会走两次成功的block，即读取缓存成功调用一次，请求网络成功再调用一次）
      */
     CTNetworkRequestCacheDataAndReadCacheLoadData,
 };
 
-typedef void(^CTMultipartFormData) (id<AFMultipartFormData>  _Nonnull formData);
-#pragma mark - completion block
-typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable response);
+#pragma mark -  block
+
+typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
+typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable responseObj);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
 
 @protocol CTNetworkRequestDelegate;
@@ -76,13 +81,12 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
  *  [request sendRequestWithDelegate:self];
  */
 @interface CTBaseRequest : NSObject <NSCopying, CTNetResponseHandle>
-
 /**
  *  请求标识码，每个请求都拥有唯一的标示
  */
 @property (nonatomic, assign, readonly) NSUInteger requestIdentifier;
 /**
- *  缓存有效期
+ *  缓存有效期 以秒为单位
  */
 @property (nonatomic, assign) NSTimeInterval cacheValidInterval;
 /**
@@ -140,6 +144,7 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
 - (void)setLongLongValue:(long long)value forParamKey:(NSString * _Nonnull)key;
 - (void)setBOOLValue:(BOOL)value forParamKey:(NSString * _Nonnull)key;
 - (void)setValue:(id _Nonnull)value forParamKey:(NSString * _Nonnull)key;
+
 @end
 
 #pragma mark - CTNetworkRequest(BGNetworkManager)

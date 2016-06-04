@@ -7,7 +7,6 @@
 //
 
 #import "CTNetworkConfiguration.h"
-#import "CTUtil.h"
 
 
 @interface CTNetworkConfiguration ()

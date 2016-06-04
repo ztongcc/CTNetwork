@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -19,24 +19,122 @@
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uj0-jG-6zM">
                                 <rect key="frame" x="-23" y="-15" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
-                                <variation key="widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="61" y="326" width="281" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="rlM-0M-fhw">
+                                        <variation key="widthClass=compact" constant="35"/>
+                                    </constraint>
+                                </constraints>
+                                <state key="normal" title="请求数据"/>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="rlM-0M-fhw"/>
+                                    </mask>
+                                </variation>
+                                <variation key="widthClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="rlM-0M-fhw"/>
+                                    </mask>
                                 </variation>
                                 <connections>
-                                    <action selector="touchAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="5u0-WY-ERc"/>
+                                    <action selector="requestAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="h7F-Qi-yuL"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Jt-rF-Owb">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <state key="normal" title="下载文件"/>
+                                <connections>
+                                    <action selector="downloadAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eZ0-hf-1FL"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uuf-Jt-1O6">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <state key="normal" title="上传图片"/>
+                                <connections>
+                                    <action selector="uploadAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cx7-jq-0bQ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4VV-Ft-1LD">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <state key="normal" title="组请求"/>
+                                <connections>
+                                    <action selector="batchAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="kve-n7-2Qq"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="4VV-Ft-1LD" firstAttribute="height" secondItem="uj0-jG-6zM" secondAttribute="height" id="55P-tF-ypM"/>
+                            <constraint firstItem="uuf-Jt-1O6" firstAttribute="leading" secondItem="uj0-jG-6zM" secondAttribute="leading" id="71a-e8-U4D"/>
+                            <constraint firstItem="uuf-Jt-1O6" firstAttribute="height" secondItem="uj0-jG-6zM" secondAttribute="height" id="BsI-l3-BM1"/>
+                            <constraint firstItem="7Jt-rF-Owb" firstAttribute="height" secondItem="uj0-jG-6zM" secondAttribute="height" id="G53-uC-erL"/>
+                            <constraint firstItem="4VV-Ft-1LD" firstAttribute="top" secondItem="uuf-Jt-1O6" secondAttribute="bottom" constant="26" id="NQ6-gZ-Wne">
+                                <variation key="widthClass=compact" constant="30"/>
+                            </constraint>
+                            <constraint firstItem="4VV-Ft-1LD" firstAttribute="leading" secondItem="uj0-jG-6zM" secondAttribute="leading" id="OdC-Rx-fbG"/>
+                            <constraint firstItem="uj0-jG-6zM" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="129" id="P0M-6O-ygm"/>
+                            <constraint firstItem="uuf-Jt-1O6" firstAttribute="trailing" secondItem="uj0-jG-6zM" secondAttribute="trailing" id="Pkj-2T-OV2"/>
+                            <constraint firstItem="uj0-jG-6zM" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="TUv-Sk-lCL">
+                                <variation key="widthClass=compact" constant="30"/>
+                            </constraint>
+                            <constraint firstItem="7Jt-rF-Owb" firstAttribute="top" secondItem="uj0-jG-6zM" secondAttribute="bottom" constant="27" id="XDH-WC-MFC">
+                                <variation key="widthClass=compact" constant="30"/>
+                            </constraint>
+                            <constraint firstItem="4VV-Ft-1LD" firstAttribute="trailing" secondItem="uj0-jG-6zM" secondAttribute="trailing" id="ZW0-K5-nOT"/>
+                            <constraint firstItem="7Jt-rF-Owb" firstAttribute="leading" secondItem="uj0-jG-6zM" secondAttribute="leading" id="azc-Ob-BUf"/>
+                            <constraint firstItem="7Jt-rF-Owb" firstAttribute="trailing" secondItem="uj0-jG-6zM" secondAttribute="trailing" id="fmB-ZG-3Ti"/>
+                            <constraint firstItem="uuf-Jt-1O6" firstAttribute="top" secondItem="7Jt-rF-Owb" secondAttribute="bottom" constant="30" id="hop-FO-XTs"/>
+                            <constraint firstAttribute="trailing" secondItem="uj0-jG-6zM" secondAttribute="trailing" constant="354" id="oBz-0j-0i2">
+                                <variation key="widthClass=compact" constant="30"/>
+                            </constraint>
+                        </constraints>
                         <variation key="default">
                             <mask key="subviews">
                                 <exclude reference="uj0-jG-6zM"/>
+                                <exclude reference="7Jt-rF-Owb"/>
+                                <exclude reference="uuf-Jt-1O6"/>
+                                <exclude reference="4VV-Ft-1LD"/>
+                            </mask>
+                            <mask key="constraints">
+                                <exclude reference="P0M-6O-ygm"/>
+                                <exclude reference="TUv-Sk-lCL"/>
+                                <exclude reference="oBz-0j-0i2"/>
+                                <exclude reference="G53-uC-erL"/>
+                                <exclude reference="XDH-WC-MFC"/>
+                                <exclude reference="azc-Ob-BUf"/>
+                                <exclude reference="fmB-ZG-3Ti"/>
+                                <exclude reference="71a-e8-U4D"/>
+                                <exclude reference="BsI-l3-BM1"/>
+                                <exclude reference="Pkj-2T-OV2"/>
+                                <exclude reference="hop-FO-XTs"/>
+                                <exclude reference="55P-tF-ypM"/>
+                                <exclude reference="NQ6-gZ-Wne"/>
+                                <exclude reference="OdC-Rx-fbG"/>
+                                <exclude reference="ZW0-K5-nOT"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
                             <mask key="subviews">
                                 <include reference="uj0-jG-6zM"/>
+                                <include reference="7Jt-rF-Owb"/>
+                                <include reference="uuf-Jt-1O6"/>
+                                <include reference="4VV-Ft-1LD"/>
+                            </mask>
+                            <mask key="constraints">
+                                <include reference="P0M-6O-ygm"/>
+                                <include reference="TUv-Sk-lCL"/>
+                                <include reference="oBz-0j-0i2"/>
+                                <include reference="G53-uC-erL"/>
+                                <include reference="XDH-WC-MFC"/>
+                                <include reference="azc-Ob-BUf"/>
+                                <include reference="fmB-ZG-3Ti"/>
+                                <include reference="71a-e8-U4D"/>
+                                <include reference="BsI-l3-BM1"/>
+                                <include reference="Pkj-2T-OV2"/>
+                                <include reference="hop-FO-XTs"/>
+                                <include reference="55P-tF-ypM"/>
+                                <include reference="NQ6-gZ-Wne"/>
+                                <include reference="OdC-Rx-fbG"/>
+                                <include reference="ZW0-K5-nOT"/>
                             </mask>
                         </variation>
                     </view>

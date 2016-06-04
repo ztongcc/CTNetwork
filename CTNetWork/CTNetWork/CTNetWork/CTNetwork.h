@@ -14,6 +14,7 @@
 #import "CTNetworkManager.h"
 #import "CTNetworkCache.h"
 #import "CTNetworkConfiguration.h"
+#import "CTBaseBatchRequest.h"
 
 
 #endif /* CTNetwork_h */

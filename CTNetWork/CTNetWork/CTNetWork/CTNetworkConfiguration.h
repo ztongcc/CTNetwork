@@ -95,6 +95,10 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
  */
 @property (nonatomic, assign)CTResponseSerializerType responseType;
 
+@property (nonatomic, assign)AFSSLPinningMode SSLPinningMode;
+
+@property (nonatomic, copy)NSSet * _Nonnull acceptableContentTypes;
+
 + (instancetype _Nonnull)configuration;
 + (instancetype _Nonnull)configurationWithBaseURL:(NSString * _Nonnull)baseURL;
 
