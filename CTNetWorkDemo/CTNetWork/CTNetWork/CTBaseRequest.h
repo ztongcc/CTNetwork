@@ -86,7 +86,7 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
  */
 @property (nonatomic, assign, readonly) NSUInteger requestIdentifier;
 /**
- *  缓存有效期 以秒为单位
+ *  缓存有效期 以秒为单位 (默认一小时)
  */
 @property (nonatomic, assign) NSTimeInterval cacheValidInterval;
 /**
@@ -133,6 +133,7 @@ typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError 
 @property (nonatomic, copy, readonly) NSDictionary * _Nonnull requestHTTPHeaderFields;
 
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface;
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface cachePolicy:(CTNetworkRequestCachePolicy)policy;
 
 #pragma mark - 设置或获取请求头的内容
 - (void)setValue:(NSString * _Nonnull)value forHTTPHeaderField:(NSString * _Nonnull)field;

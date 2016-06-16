@@ -41,6 +41,7 @@ static NSUInteger _requestIdentifier = 0;
         _mutableParametersDic = [[NSMutableDictionary alloc] init];
         self.requestMethod = CTNetworkRequestHTTPGet;
         self.cachePolicy = CTNetworkRquestCacheNone;
+        self.cacheValidInterval = 60*60;
     }
     return self;
 }
@@ -50,6 +51,15 @@ static NSUInteger _requestIdentifier = 0;
     self = [self init];
     if (self) {
         self.interface = interface;
+    }
+    return self;
+}
+
+- (instancetype)initWithInterface:(NSString * _Nullable)interface cachePolicy:(CTNetworkRequestCachePolicy)policy
+{
+    self = [self initWithInterface:interface];
+    if (self) {
+        self.cachePolicy = policy;
     }
     return self;
 }

@@ -54,6 +54,15 @@ static NSUInteger _requestIdentifier = 0;
     return self;
 }
 
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface cachePolicy:(CTNetworkRequestCachePolicy)policy
+{
+    self = [self initWithInterface:interface];
+    if (self) {
+        self.cachePolicy = policy;
+    }
+    return self;
+}
+
 #pragma mark - set or get method
 - (NSUInteger)requestIdentifier {
     return _requestIdentifier;
