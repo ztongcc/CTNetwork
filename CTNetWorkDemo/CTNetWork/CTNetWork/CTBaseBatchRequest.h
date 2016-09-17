@@ -12,18 +12,20 @@
 
 @interface CTBaseBatchRequest : NSObject
 
-/**
- *  init method
- *  @param requestArray 一组CTBaseRequest
- */
-- (instancetype _Nonnull)initWithRequests:(NSArray * _Nullable)requestArray;
-
 @property (nonatomic, readonly) NSArray * _Nonnull requestArray;
 
 /**
  *  当某个请求失败后，是否还继续加载其它请求，默认YES
  */
 @property (nonatomic, assign) BOOL continueLoadWhenRequestFailure;
+
+
+
+/**
+ *  init method
+ *  @param requestArray 一组CTBaseRequest
+ */
+- (instancetype _Nonnull)initWithRequests:(NSArray * _Nullable)requestArray;
 
 
 /**
@@ -41,4 +43,5 @@
  *  取消网络请求
  */
 - (void)cancle;
+
 @end

@@ -17,6 +17,7 @@ static NSUInteger _requestIdentifier = 0;
 {
     NSString *_methodName;
 }
+@property (nonatomic, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
 @property (nonatomic, strong) NSMutableDictionary *mutableParametersDic;
 @property (nonatomic, strong) NSMutableDictionary *mutableRequestHTTPHeaderFields;
 /**
@@ -41,11 +42,9 @@ static NSUInteger _requestIdentifier = 0;
         _mutableParametersDic = [[NSMutableDictionary alloc] init];
         self.requestMethod = CTNetworkRequestHTTPGet;
         self.cachePolicy = CTNetworkRquestCacheNone;
-        self.cacheValidInterval = 60*60;
     }
     return self;
 }
-
 - (instancetype)initWithInterface:(NSString * _Nullable)interface
 {
     self = [self init];
@@ -55,23 +54,49 @@ static NSUInteger _requestIdentifier = 0;
     return self;
 }
 
-- (instancetype)initWithInterface:(NSString * _Nullable)interface cachePolicy:(CTNetworkRequestCachePolicy)policy
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
+                               cachePolicy:(CTNetworkRequestCachePolicy)policy
 {
-    self = [self initWithInterface:interface];
+    return [self initWithInterface:interface parameter:nil cachePolicy:CTNetworkRquestCacheNone];
+}
+
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
+                                 parameter:(NSDictionary * _Nullable)param
+{
+    return [self initWithInterface:interface parameter:param cachePolicy:CTNetworkRquestCacheNone];
+}
+
+- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
+                                 parameter:(NSDictionary * _Nullable)param
+                               cachePolicy:(CTNetworkRequestCachePolicy)policy
+{
+    self = [self init];
     if (self) {
+        self.interface = interface;
+        self.parametersDic = param;
         self.cachePolicy = policy;
     }
     return self;
 }
 
 #pragma mark - set or get method
-- (NSUInteger)requestIdentifier {
+- (NSUInteger)requestIdentifier
+{
     return _requestIdentifier;
 }
 
 - (NSDictionary *)parametersDic
 {
-    return [_mutableParametersDic copy];
+    @autoreleasepool
+    {
+        NSMutableDictionary * paramDict = [NSMutableDictionary dictionaryWithDictionary:_mutableParametersDic];
+        if (_parametersDic != nil)
+        {
+            [paramDict addEntriesFromDictionary:_parametersDic];
+        }
+        return [paramDict copy];
+    }
+
 }
 
 - (NSDictionary *)requestHTTPHeaderFields
@@ -101,23 +126,28 @@ static NSUInteger _requestIdentifier = 0;
 }
 
 #pragma mark - 设置参数
-- (void)setIntegerValue:(NSInteger)value forParamKey:(NSString *)key{
+- (void)setIntegerValue:(NSInteger)value forParamKey:(NSString *)key
+{
     [self setValue:[NSNumber numberWithInteger:value] forParamKey:key];
 }
 
-- (void)setDoubleValue:(double)value forParamKey:(NSString *)key{
+- (void)setDoubleValue:(double)value forParamKey:(NSString *)key
+{
     [self setValue:[NSNumber numberWithDouble:value] forParamKey:key];
 }
 
-- (void)setLongLongValue:(long long)value forParamKey:(NSString *)key{
+- (void)setLongLongValue:(long long)value forParamKey:(NSString *)key
+{
     [self setValue:[NSNumber numberWithLongLong:value] forParamKey:key];
 }
 
-- (void)setBOOLValue:(BOOL)value forParamKey:(NSString *)key{
+- (void)setBOOLValue:(BOOL)value forParamKey:(NSString *)key
+{
     [self setValue:[NSNumber numberWithBool:value] forParamKey:key];
 }
 
-- (void)setValue:(id)value forParamKey:(NSString *)key{
+- (void)setValue:(id)value forParamKey:(NSString *)key
+{
     if(!key){
         return;
     }
@@ -125,6 +155,11 @@ static NSUInteger _requestIdentifier = 0;
         value = @"";
     }
     _mutableParametersDic[key] = value;
+}
+
+- (void)start
+{
+    [[CTNetworkManager sharedManager] sendRequest:self success:self.successBlock failure:self.failureBlock];
 }
 
 
@@ -152,25 +187,43 @@ static NSUInteger _requestIdentifier = 0;
 - (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock
                         failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
-    [[CTNetworkManager sharedManager] sendRequest:self success:successBlock failure:failureBlock];
+    self.successBlock = successBlock;
+    self.failureBlock = failureBlock;
+    [[CTNetworkManager sharedManager] sendRequest:self
+                                          success:self.successBlock
+                                          failure:self.failureBlock];
 }
 
-- (void)startUploadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull uploadProgress))progressBlock
+- (void)startUploadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
                                success:(CTNetworkSuccessBlock _Nullable)successBlock
                                failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
-    [[CTNetworkManager sharedManager] sendUploadRequest:self progress:progressBlock success:successBlock failure:failureBlock];
+    self.successBlock = successBlock;
+    self.progressBlock = progressBlock;
+    self.failureBlock = failureBlock;
+    [[CTNetworkManager sharedManager] sendUploadRequest:self
+                                               progress:self.progressBlock
+                                                success:self.successBlock
+                                                failure:self.failureBlock];
 }
 
-- (void)startDownloadRequestWithProgress:(nullable void (^)(NSProgress * _Nonnull downloadProgress))progressBlock
+- (void)startDownloadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
                                  success:(CTNetworkSuccessBlock _Nullable)successBlock
                                  failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
-    [[CTNetworkManager sharedManager] sendDownloadRequest:self progress:progressBlock success:successBlock failure:failureBlock];
-}
-- (void)cancle
-{
-    [self.sessionTask cancel];
+    self.successBlock = successBlock;
+    self.failureBlock = failureBlock;
+    self.progressBlock = progressBlock;
+    [[CTNetworkManager sharedManager] sendDownloadRequest:self
+                                                 progress:self.progressBlock
+                                                  success:self.successBlock
+                                                  failure:self.failureBlock];
 }
 
+- (void)cancle
+{
+    if (self.sessionTask && [self.sessionTask respondsToSelector:@selector(cancel)]) {
+        [self.sessionTask cancel];
+    }
+}
 @end

@@ -11,9 +11,6 @@
 #import "CTBaseRequest.h"
 #import "CTNetworkCache.h"
 
-//#import "BGDownloadRequest.h"
-//#import "BGUploadRequest.h"
-
 
 @interface CTNetworkManager : NSObject
 /**
@@ -79,6 +76,12 @@
  */
 - (void)cancelRequestWithUrl:(NSString * _Nonnull)url;
 
+/**
+ *  取消请求
+ *
+ *  @param request
+ */
+- (void)cancelRequest:(CTBaseRequest * _Nonnull)request;
 /**
  *  cancel download request
  */

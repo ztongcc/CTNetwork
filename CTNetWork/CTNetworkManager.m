@@ -155,10 +155,12 @@ static CTNetworkManager *_manager = nil;
                          filePath:(NSURL *)filePath
                             error:(NSError *)error
                           success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
-                          failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock {
+                          failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         if(error) {
-            if(failureBlock) {
+            if(failureBlock)
+            {
                 failureBlock(request, error);
             }
         }
@@ -212,7 +214,8 @@ static CTNetworkManager *_manager = nil;
     //发送网络之前，先进行一下预处理
     [self.configuration prepareProcessingRequest:request];
     
-    switch (request.cachePolicy) {
+    switch (request.cachePolicy)
+    {
         case CTNetworkRquestCacheNone:
             //请求网络数据
             [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
@@ -481,6 +484,22 @@ static CTNetworkManager *_manager = nil;
 {
     [self.sessionManager cancelTaskWithUrl:url];
 }
+
+- (void)cancelRequest:(CTBaseRequest * _Nonnull)request
+{
+    @synchronized (self)
+    {
+        NSString * detailUrl = request.interface;
+        if (![detailUrl hasPrefix:@"http"])
+        {
+            detailUrl = [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
+        }
+        [self.sessionManager cancelTaskWithUrl:detailUrl];
+        request.successBlock = nil;
+        request.failureBlock = nil;
+    }
+}
+
 
 - (void)cancelDownloadRequest:(CTBaseRequest *)request
 {

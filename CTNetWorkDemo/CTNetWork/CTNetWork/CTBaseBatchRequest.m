@@ -7,9 +7,14 @@
 //
 
 #import "CTBaseBatchRequest.h"
+#import "CTNetworkManager.h"
 #import "CTBaseRequest.h"   
 
 @interface CTBaseBatchRequest ()
+
+@property (nonatomic, copy)void (^successBlock)(CTBaseRequest * request, id responseObj);
+@property (nonatomic, copy)void (^failureBlock)(CTBaseRequest * request, NSError * error);
+@property (nonatomic, copy)void (^completBlock)(CTBaseBatchRequest * request, BOOL isFinish);
 
 @property (nonatomic, strong) NSArray *requestArray;
 
@@ -36,33 +41,48 @@
 {
     
     NSInteger requestCount = self.requestArray.count;
+    self.successBlock = successBlock;
+    self.failureBlock = failureBlock;
+    self.completBlock = completionBlock;
     __block NSInteger successCount = 0;
-    
-    for (CTBaseRequest * request in self.requestArray) {
-        
-        [request startRequestWithSuccess:^(CTBaseRequest * _Nonnull request, id  _Nullable response) {
+    __weak typeof (self) weakSelf = self;
+    for (CTBaseRequest * request in self.requestArray)
+    {
+        [request startRequestWithSuccess:^(CTBaseRequest * _Nonnull request, id  _Nullable response)
+        {
             successCount++;
-            if(successBlock) {
-                successBlock(request, response);
+            if(weakSelf.successBlock)
+            {
+                weakSelf.successBlock(request, response);
             }
-            if(successCount == requestCount) {
-                if(completionBlock) {
-                    completionBlock(self, YES);
+            if(successCount == requestCount)
+            {
+                if(weakSelf.completBlock)
+                {
+                    weakSelf.completBlock(weakSelf, YES);
                 }
             }
-        } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
+        }
+        failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error)
+        {
             successCount++;
-            if(failureBlock) {
-                failureBlock(request, error);
+            if(weakSelf.failureBlock)
+            {
+                weakSelf.failureBlock(request, error);
             }
-            if(!self.continueLoadWhenRequestFailure) {
-                if(completionBlock) {
-                    completionBlock(self, NO);
+            if(!self.continueLoadWhenRequestFailure)
+            {
+                [weakSelf cancle];
+                if(weakSelf.completBlock)
+                {
+                    weakSelf.completBlock(weakSelf, NO);
                 }
             }
-            if(successCount == requestCount) {
-                if(completionBlock) {
-                    completionBlock(self, YES);
+            if(successCount == requestCount)
+            {
+                if(weakSelf.completBlock)
+                {
+                    weakSelf.completBlock(weakSelf, YES);
                 }
             }
         }];
@@ -71,9 +91,18 @@
 
 - (void)cancle
 {
-    for (CTBaseRequest * request in _requestArray) {
-        [request.sessionTask cancel];
+    for (CTBaseRequest * request in _requestArray)
+    {
+        [[CTNetworkManager sharedManager] cancelRequest:request];
     }
+    [self clearBlockCallback];
+}
+
+- (void)clearBlockCallback
+{
+    self.successBlock = nil;
+    self.failureBlock = nil;
+    self.completBlock = nil;
 }
 
 @end
