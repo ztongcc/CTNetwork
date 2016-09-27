@@ -42,6 +42,14 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 - (void)prepareProcessingRequest:(CTBaseRequest * _Nonnull)request;
 
 /**
+ *  最终请求参数
+ *
+ *  @param dict 原参数字典
+ *
+ *  @return 处理后的参数字典
+ */
+- (NSDictionary * _Nullable)requestParamterWithRequest:(CTBaseRequest * _Nonnull)request;
+/**
  *  对request当中的HTTP Header进行处理，可以在此方法内部加入公共的请求头内容
  *
  *  @param request 请求

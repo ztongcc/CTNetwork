@@ -41,33 +41,22 @@
  *  发送请求
  *
  *  @param request                请求
- *  @param successCompletionBlock 成功调回
- *  @param businessFailureBlock   业务失败调回
- *  @param networkFailureBlock    网络失败调回
  */
-- (void)sendRequest:(CTBaseRequest * _Nonnull)request
-            success:(CTNetworkSuccessBlock _Nullable)successBlock
-            failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+- (void)sendRequest:(CTBaseRequest * _Nonnull)request;
 
 /**
  *  发送下载请求
  *
- *  @param request                下载请求
- *  @param downloadProgressBlock  下载的进度条
- *  @param successBlock 下载成功
- *  @param failureBlock 下载失败
+ *  @param request    下载请求
  */
-- (void)sendDownloadRequest:(CTBaseRequest * _Nonnull)request
-                   progress:(nullable void (^)(NSProgress * _Nonnull downloadProgress)) downloadProgressBlock
-                    success:(nullable void (^)(CTBaseRequest * _Nonnull request, NSURL * _Nullable filePath))successBlock
-                    failure:(nullable void (^)(CTBaseRequest * _Nonnull request, NSError * _Nullable error))failureBlock;
+- (void)sendDownloadRequest:(CTBaseRequest * _Nonnull)request;
 
-
-- (void)sendUploadRequest:(CTBaseRequest * _Nonnull)request
-                 progress:(nullable void (^)(NSProgress * _Nonnull uploadProgress))uploadProgress
-                  success:(CTNetworkSuccessBlock _Nullable)successBlock
-                  failure:(CTNetworkFailureBlock _Nullable)networkBlock;
-
+/**
+ *  发送上传请求
+ *
+ *  @param request        <#request description#>
+ */
+- (void)sendUploadRequest:(CTBaseRequest * _Nonnull)request;
 
 /**
  *  取消请求
@@ -85,7 +74,7 @@
 /**
  *  cancel download request
  */
-//- (void)cancelDownloadRequest:(CTDownloadRequest * _Nonnull)request;
+- (void)cancelDownloadRequest:(CTBaseRequest * _Nonnull)request;
 
 
 @end

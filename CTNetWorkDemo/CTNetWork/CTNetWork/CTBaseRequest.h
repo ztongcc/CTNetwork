@@ -58,8 +58,10 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
 
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
 typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable responseObj);
+typedef void(^CTNetworkDownloadBlock)(CTBaseRequest  * _Nonnull request, NSURL * _Nullable filePath);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
 typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
+
 @protocol CTNetworkRequestDelegate;
 @protocol CTNetResponseHandle <NSObject>
 /**
@@ -95,25 +97,33 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, assign) BOOL isFromCache;
 
 /**
+ *  当该请求处于活跃状态的时候再次发送是否需要过滤掉
+ */
+@property (nonatomic, assign) BOOL isCancleSendWhenExciting;
+/**
  *  请求Session Task
  */
-@property (nonatomic, readonly) NSURLSessionDataTask * _Nullable sessionTask;
+@property (nonatomic, readonly, nullable) NSURLSessionDataTask * sessionTask;
 
 /**
  *  请求成功Block
  */
-@property (nonatomic, copy)CTNetworkSuccessBlock _Nullable successBlock;
+@property (nonatomic, copy, nullable)CTNetworkSuccessBlock successBlock;
 
 /**
  *  请求失败Block
  */
-@property (nonatomic, copy)CTNetworkFailureBlock _Nullable failureBlock;
+@property (nonatomic, copy, nullable)CTNetworkFailureBlock failureBlock;
 
 /**
  *  上传/下载进度
  */
-@property (nonatomic, copy)CTNetworkProgressBlock _Nullable progressBlock;
+@property (nonatomic, copy, nullable)CTNetworkProgressBlock progressBlock;
 
+/**
+ *  下载完成Block
+ */
+@property (nonatomic, copy, nullable)CTNetworkDownloadBlock downloadBlock;
 /**
  *  HTTP请求的方法，默认GET，现支持GET和POST, DELETE , PUT
  */
@@ -135,13 +145,18 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, copy) NSString * _Nonnull fileName;
 
 /**
+ *  请求时用到的临时缓存Key
+ */
+@property (nonatomic, readonly, nonnull) NSString * requestKey;
+
+/**
  *  参数字典
  */
-@property (nonatomic, copy) NSDictionary * _Nonnull parametersDic;
+@property (nonatomic, copy, nonnull) NSDictionary *  parametersDic;
 /**
  *  请求头
  */
-@property (nonatomic, copy, readonly) NSDictionary * _Nonnull requestHTTPHeaderFields;
+@property (nonatomic, readonly, nonnull) NSDictionary * requestHTTPHeaderFields;
 
 /**
  *  初始化方法

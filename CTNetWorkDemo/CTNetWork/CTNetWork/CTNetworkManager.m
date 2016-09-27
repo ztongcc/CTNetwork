@@ -60,55 +60,73 @@ static CTNetworkManager *_manager = nil;
 }
 
 
-#pragma makr - download request
+- (NSString *)buildRequestUrl:(CTBaseRequest *)request
+{
+    NSString *detailUrl = [request interface];
+    if ([detailUrl hasPrefix:@"http"]) {
+        return detailUrl;
+    }
+    // filter url
+    return [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
+}
+
+
+#pragma mark - download request -
 - (void)sendDownloadRequest:(CTBaseRequest *)request
-                   progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
-                    success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
-                    failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock
 {
     
     NSString * requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
     NSString * fileName = [self downloadRequestFileName:request];
-    if (request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheOnly) {
-        
+    if (request.cachePolicy == CTNetworkRquestCacheNone)
+    {
+        [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName];
     }
-    [self.cache queryDiskCacheForFileName:fileName expiryDate:request.cacheValidInterval completion:^(id  _Nullable object) {
-        //有缓存，则直接返回
-        if(object && [object isKindOfClass:[NSData class]]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
-                //保存文件
-                if(successBlock) {
-                    successBlock(request, filePath);
-                }
-            });
-        }
-        else {
-            [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName progress:downloadProgressBlock success:successBlock failure:failureBlock];
-        }
-    }];
+    else
+    {
+        [self.cache queryDiskCacheForFileName:fileName expiryDate:request.cacheValidInterval completion:^(id  _Nullable object)
+         {
+             //有缓存，则直接返回
+             if(object && [object isKindOfClass:[NSData class]])
+             {
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
+                     //保存文件
+                     if(request.downloadBlock)
+                     {
+                         request.downloadBlock(request, filePath);
+                     }
+                 });
+             }
+             else
+             {
+                 [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName];
+             }
+         }];
+    }
 }
 
 - (void)downloadDataWithRequest:(CTBaseRequest *)request
                      requestURL:(NSString *)requestURLString
                        fileName:(NSString *)fileName
-                       progress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
-                        success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
-                        failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock {
+{
     
     NSString *resumeDataFileName = [NSString stringWithFormat:@"%@_resume", fileName];
-    [self.cache queryDiskCacheForFileName:resumeDataFileName expiryDate:request.cacheValidInterval completion:^(id  _Nullable object) {
+    [self.cache queryDiskCacheForFileName:resumeDataFileName expiryDate:request.cacheValidInterval completion:^(id  _Nullable object)
+    {
         //有数据，断点续传
-        if(object && [object isKindOfClass:[NSData class]]) {
-            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithResumeData:object progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+        if(object && [object isKindOfClass:[NSData class]])
+        {
+            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithResumeData:object progress:request.progressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
                 //4xx 客户端错误
                 //5xx 服务器错误
                 //2xx 请求成功
                 //3xx 重定向
-                if(((NSHTTPURLResponse *) response).statusCode >= 400) {
+                if(((NSHTTPURLResponse *) response).statusCode >= 400)
+                {
                     return targetPath;
                 }
-                else {
+                else
+                {
                     return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
                 }
             } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
@@ -117,7 +135,7 @@ static CTNetworkManager *_manager = nil;
                     [self.cache removeCacheForFileName:resumeDataFileName];
                 }
                 self.tempDownloadTaskDic[requestURLString] = nil;
-                [self handleResultWithDownloadRequest:request filePath:filePath error:error success:successBlock failure:failureBlock];
+                [self handleResultWithDownloadRequest:request filePath:filePath error:error];
             }];
             
             [task resume];
@@ -128,8 +146,8 @@ static CTNetworkManager *_manager = nil;
             //无缓存，则重新下载
             NSMutableURLRequest *httpRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:requestURLString]];
             [self setHttpRequestHeardFieldsWithRequest:request];
-            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithRequest:httpRequest progress:downloadProgressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-                
+            NSURLSessionDownloadTask *task = [self.sessionManager downloadTaskWithRequest:httpRequest progress:request.progressBlock destination:^NSURL * _Nullable(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response)
+            {
                 if(((NSHTTPURLResponse *) response).statusCode >= 400) {
                     return targetPath;
                 }
@@ -140,8 +158,7 @@ static CTNetworkManager *_manager = nil;
             } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
                 //清空task
                 self.tempDownloadTaskDic[requestURLString] = nil;
-                [self handleResultWithDownloadRequest:request filePath:filePath error:error success:successBlock failure:failureBlock];
-                
+                [self handleResultWithDownloadRequest:request filePath:filePath error:error];
             }];
             
             [task resume];
@@ -154,19 +171,19 @@ static CTNetworkManager *_manager = nil;
 - (void)handleResultWithDownloadRequest:(CTBaseRequest *)request
                          filePath:(NSURL *)filePath
                             error:(NSError *)error
-                          success:(void (^)(CTBaseRequest * _Nonnull, NSURL * _Nullable))successBlock
-                          failure:(void (^)(CTBaseRequest * _Nonnull, NSError * _Nullable))failureBlock
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(error) {
-            if(failureBlock)
+        if(error)
+        {
+            if(request.failureBlock)
             {
-                failureBlock(request, error);
+                request.failureBlock(request, error);
             }
         }
         else {
-            if(successBlock) {
-                successBlock(request, filePath);
+            if(request.downloadBlock)
+            {
+                request.downloadBlock(request, filePath);
             }
         }
     });
@@ -192,24 +209,25 @@ static CTNetworkManager *_manager = nil;
     return [NSString stringWithFormat:@"%@_resume", [self downloadRequestFileName:request]];
 }
 
-#pragma mark - upload request
+#pragma mark - upload request -
 - (void)sendUploadRequest:(CTBaseRequest *)request
-                 progress:(void (^)(NSProgress * _Nonnull))uploadProgress
-                  success:(CTNetworkSuccessBlock)successBlock
-                  failure:(CTNetworkFailureBlock)failureBlock {
+{
+    [self setHttpRequestHeardFieldsWithRequest:request];
     NSString * url = [self buildRequestUrl:request];
-    request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic constructingBodyWithBlock:request.formData progress:uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject) {
-        
-        [self networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
-        
+    NSDictionary * param = [self.configuration requestParamterWithRequest:request];
+    request.sessionTask = [self.sessionManager POST:url
+                                         parameters:param
+                          constructingBodyWithBlock:request.formData
+                                           progress:request.progressBlock
+                                            success:^(NSURLSessionDataTask * _Nonnull task, id  _Nonnull responseObject)
+    {
+        [self networkSuccess:request task:task responseData:responseObject];
     } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nullable error) {
-        [self failure:request error:error completion:failureBlock];
+        [self failure:request error:error];
     }];
 }
 
 - (void)sendRequest:(CTBaseRequest *)request
-            success:(CTNetworkSuccessBlock)successBlock
-            failure:(CTNetworkFailureBlock)failureBlock
 {
     //发送网络之前，先进行一下预处理
     [self.configuration prepareProcessingRequest:request];
@@ -218,27 +236,29 @@ static CTNetworkManager *_manager = nil;
     {
         case CTNetworkRquestCacheNone:
             //请求网络数据
-            [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
+            [self startNetworkDataWithRequest:request];
             break;
         case CTNetworkRequestCacheDataAndReadCacheOnly:
         case CTNetworkRequestCacheDataAndRefreshCacheData:
         case CTNetworkRequestCacheDataAndReadCacheLoadData:
             //读取缓存并且请求数据
-            [self readCacheWithRequest:request completion:^(CTBaseRequest *request, id responseObject) {
+            [self readCacheWithRequest:request completion:^(CTBaseRequest *request, id responseObject)
+            {
                 if(responseObject){
                     /*
                      缓存策略
                      CTBaseRequestCacheDataAndReadCacheOnly：获取缓存数据直接调回，不再请求
                      */
-                    [self success:request responseObject:responseObject completion:successBlock isFromCache:YES];
+                    [self success:request responseObject:responseObject isFromCache:YES];
 
                     // CTBaseRequestCacheDataAndReadCacheLoadData：缓存数据成功调回并且重新请求网络
-                    if(request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData || request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData){
-                        [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
+                    if(request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData || request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData)
+                    {
+                        [self startNetworkDataWithRequest:request];
                     }
                 }else{
                     //无缓存数据，则还需要再请求网络
-                    [self startNetworkDataWithRequest:request success:successBlock failure:failureBlock];
+                    [self startNetworkDataWithRequest:request];
                 }
             }];
     }
@@ -247,10 +267,13 @@ static CTNetworkManager *_manager = nil;
 - (void)setHttpRequestHeardFieldsWithRequest:(CTBaseRequest *)request
 {
     NSDictionary * headerFieldValueDictionary = request.requestHTTPHeaderFields;
-    if (headerFieldValueDictionary != nil) {
-        for (id httpHeaderField in headerFieldValueDictionary.allKeys) {
+    if (headerFieldValueDictionary != nil)
+    {
+        for (id httpHeaderField in headerFieldValueDictionary.allKeys)
+        {
             id value = headerFieldValueDictionary[httpHeaderField];
-            if ([httpHeaderField isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
+            if ([httpHeaderField isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]])
+            {
                 [_sessionManager.requestSerializer setValue:(NSString *)value forHTTPHeaderField:(NSString *)httpHeaderField];
             } else {
                 NSLog(@"Error, class of key/value in headerFieldValueDictionary should be NSString.");
@@ -260,55 +283,61 @@ static CTNetworkManager *_manager = nil;
 }
 
 - (void)startNetworkDataWithRequest:(CTBaseRequest *)request
-                            success:(CTNetworkSuccessBlock)successBlock
-                            failure:(CTNetworkFailureBlock)failureBlock
 {
     //临时保存请求
-    NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
+    NSString *requestKey = request.requestKey;
+    if (request.isCancleSendWhenExciting)
+    {
+        if ([[_tempRequestDic allKeys] containsObject:requestKey])
+        {   // 取消发送请求
+            return;
+        }
+    }
     self.tempRequestDic[requestKey] = request;
     
     NSString * url = [self buildRequestUrl:request];
     NSLog(@"CTRequest url %@", url);
 
     [self setHttpRequestHeardFieldsWithRequest:request];
-    
+    // 生成请求参数
+    NSDictionary * param = [self.configuration requestParamterWithRequest:request];
     //发送请求
-    __weak CTNetworkManager *weakManager = self;
+    __weak CTNetworkManager * weakManager = self;
     switch (request.requestMethod) {
         case CTNetworkRequestHTTPGet:
         {
-            request.sessionTask = [self.sessionManager GET:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
+            request.sessionTask = [self.sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakManager networkSuccess:request task:task responseData:responseObject];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager failure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error];
             }];
         }
             break;
         case CTNetworkRequestHTTPPost:
         {
-            request.sessionTask = [self.sessionManager POST:url parameters:request.parametersDic progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
+            request.sessionTask = [self.sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakManager networkSuccess:request task:task responseData:responseObject];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager failure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error];
             }];
         }
             break;
         case CTNetworkRequestHTTPDelete:
         {
-            request.sessionTask = [self.sessionManager DELETE:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
+            request.sessionTask = [self.sessionManager DELETE:url parameters:param success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakManager networkSuccess:request task:task responseData:responseObject];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager failure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error];
             }];
         }
             break;
 
         case CTNetworkRequestHTTPPut:
         {
-            request.sessionTask = [self.sessionManager PUT:url parameters:request.parametersDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-                [weakManager networkSuccess:request task:task responseData:responseObject success:successBlock failure:failureBlock];
+            request.sessionTask = [self.sessionManager PUT:url parameters:param success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakManager networkSuccess:request task:task responseData:responseObject ];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-                [weakManager failure:request error:error completion:failureBlock];
+                [weakManager failure:request error:error];
             }];
         }
             break;
@@ -318,15 +347,6 @@ static CTNetworkManager *_manager = nil;
     }
 }
 
-- (NSString *)buildRequestUrl:(CTBaseRequest *)request
-{
-    NSString *detailUrl = [request interface];
-    if ([detailUrl hasPrefix:@"http"]) {
-        return detailUrl;
-    }
-    // filter url
-    return [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
-}
 
 #pragma mark - cache method -
 - (void)readCacheWithRequest:(CTBaseRequest *)request completion:(void (^)(CTBaseRequest *request, id responseObject))completionBlock
@@ -352,16 +372,15 @@ static CTNetworkManager *_manager = nil;
     [self.cache storeData:responseData forFileName:CTKeyFromRequestAndBaseURL(request.parametersDic, self.baseURL, request.interface)];
 }
 
-#pragma mark - set method
+#pragma mark - set method -
 - (void)setNetworkConfiguration:(CTNetworkConfiguration *)configuration
 {
     NSParameterAssert(configuration);
     NSParameterAssert(configuration.baseURLString);
     
-    
     // CTHTTPSessionManager
     _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
-    AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+    AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:configuration.SSLPinningMode];
     //是否允许CA不信任的证书通过
     policy.allowInvalidCertificates = YES;
     //是否验证主机名
@@ -381,6 +400,7 @@ static CTNetworkManager *_manager = nil;
         _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
     }
 
+    _sessionManager.requestSerializer.timeoutInterval = configuration.timeInterval;
     NSMutableSet * sets = [NSMutableSet setWithSet:_sessionManager.responseSerializer.acceptableContentTypes];
     [sets unionSet:configuration.acceptableContentTypes];
     _sessionManager.responseSerializer.acceptableContentTypes = sets;
@@ -395,8 +415,6 @@ static CTNetworkManager *_manager = nil;
 - (void)networkSuccess:(CTBaseRequest *)request
                   task:(NSURLSessionDataTask *)task
           responseData:(id)responseData
-               success:(CTNetworkSuccessBlock)successBlock
-               failure:(CTNetworkFailureBlock)failureBlock
 {
     
     dispatch_async(self.dataHandleQueue, ^{
@@ -405,31 +423,35 @@ static CTNetworkManager *_manager = nil;
         NSData *decryptData = [self.configuration decryptResponseData:responseObject response:task.response request:request];
         //解析数据
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(responseObject) {
-                if([self.configuration shouldCacheResponseData:responseObject task:task request:request]) {
+            if(responseObject)
+            {
+                if([self.configuration shouldCacheResponseData:responseObject task:task request:request])
+                {
                     //缓存解密之后的数据
                     [self cacheResponseData:decryptData request:request];
                 }
-                if (request.cachePolicy != CTNetworkRequestCacheDataAndRefreshCacheData) {
+                if (request.cachePolicy != CTNetworkRequestCacheDataAndRefreshCacheData)
+                {
                     //成功回调
-                    [self success:request responseObject:responseData completion:successBlock isFromCache:NO];
+                    [self success:request responseObject:decryptData isFromCache:NO];
                 }
-            }else {
-                if (request.cachePolicy != CTNetworkRequestCacheDataAndRefreshCacheData) {
+            }
+            else
+            {
+                if (request.cachePolicy != CTNetworkRequestCacheDataAndRefreshCacheData)
+                {
                     NSError * error = [NSError errorWithDomain:@"CTNetwork error" code:1000 userInfo:nil];
-                    [self failure:request error:error completion:failureBlock];
+                    [self failure:request error:error];
                 }
             }
         });
     });
-    
     //remove temp request
     [self removeTempRequest:request];
 }
 
 - (void)success:(CTBaseRequest *)request
  responseObject:(id)responseObject
-     completion:(CTNetworkSuccessBlock)successCompletionBlock
     isFromCache:(BOOL)isFromCache
 {
     dispatch_async(self.dataHandleQueue, ^{
@@ -448,8 +470,8 @@ static CTNetworkManager *_manager = nil;
         request.isFromCache = isFromCache;
         //成功回调
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(successCompletionBlock) {
-                successCompletionBlock(request, resultObject);
+            if(request.successBlock) {
+                request.successBlock(request, resultObject);
             }
         });
     });
@@ -458,14 +480,14 @@ static CTNetworkManager *_manager = nil;
 /**
  *  网络失败
  */
-- (void)failure:(CTBaseRequest *)request error:(NSError *)error completion:(CTNetworkFailureBlock)failureBlock
+- (void)failure:(CTBaseRequest *)request error:(NSError *)error
 {
     //remove temp request
-    [self removeTempRequest:request];
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(failureBlock) {
-            failureBlock(request, error);
+        if(request.failureBlock) {
+            request.failureBlock(request, error);
         }
+        [self removeTempRequest:request];
     });
 }
 
@@ -475,8 +497,7 @@ static CTNetworkManager *_manager = nil;
  */
 - (void)removeTempRequest:(CTBaseRequest *)request
 {
-    NSString *requestKey = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
-    [self.tempRequestDic removeObjectForKey:requestKey];
+    [self.tempRequestDic removeObjectForKey:request.requestKey];
 }
 
 #pragma mark - cancel request
@@ -505,7 +526,8 @@ static CTNetworkManager *_manager = nil;
 {
     NSString *requestURLString = [[NSURL URLWithString:request.interface relativeToURL:self.baseURL] absoluteString];
     NSURLSessionDownloadTask *task = self.tempDownloadTaskDic[requestURLString];
-    [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+    [task cancelByProducingResumeData:^(NSData * _Nullable resumeData)
+    {
         NSString *resumeDataFileName = [self downloadRequestResumeDataFileName:request];
         //缓存，以用来断点续传
         [self.cache storeData:resumeData forFileName:resumeDataFileName];

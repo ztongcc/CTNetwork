@@ -58,8 +58,10 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
 
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
 typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable responseObj);
+typedef void(^CTNetworkDownloadBlock)(CTBaseRequest  * _Nonnull request, NSURL * _Nullable filePath);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
 typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
+
 @protocol CTNetworkRequestDelegate;
 @protocol CTNetResponseHandle <NSObject>
 /**
@@ -95,6 +97,10 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, assign) BOOL isFromCache;
 
 /**
+ *  当该请求处于活跃状态的时候再次发送是否需要过滤掉
+ */
+@property (nonatomic, assign) BOOL isCancleSendWhenExciting;
+/**
  *  请求Session Task
  */
 @property (nonatomic, readonly) NSURLSessionDataTask * _Nullable sessionTask;
@@ -115,6 +121,10 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, copy)CTNetworkProgressBlock _Nullable progressBlock;
 
 /**
+ *  下载完成Block
+ */
+@property (nonatomic, copy)CTNetworkDownloadBlock _Nullable downloadBlock;
+/**
  *  HTTP请求的方法，默认GET，现支持GET和POST, DELETE , PUT
  */
 @property (nonatomic, assign) CTNetworkRequestHTTPMethod requestMethod;
@@ -133,6 +143,11 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
  *  下载文件时使用
  */
 @property (nonatomic, copy) NSString * _Nonnull fileName;
+
+/**
+ *  请求时用到的临时缓存Key
+ */
+@property (nonatomic, readonly) NSString * _Nonnull requestKey;
 
 /**
  *  参数字典

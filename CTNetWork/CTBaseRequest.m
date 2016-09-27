@@ -8,18 +8,19 @@
 
 #import "CTBaseRequest.h"
 #import "CTNetworkManager.h"
+#import "CTNetworkCache.h"
 #import <objc/runtime.h>
 
 
 static NSUInteger _requestIdentifier = 0;
 
 @interface CTBaseRequest ()
-{
-    NSString *_methodName;
-}
+
 @property (nonatomic, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
 @property (nonatomic, strong) NSMutableDictionary *mutableParametersDic;
 @property (nonatomic, strong) NSMutableDictionary *mutableRequestHTTPHeaderFields;
+@property (nonatomic, copy) NSString * requestKey;
+
 /**
  *  代理
  */
@@ -40,6 +41,7 @@ static NSUInteger _requestIdentifier = 0;
         _requestIdentifier += 1;
         _mutableRequestHTTPHeaderFields = [[NSMutableDictionary alloc] init];
         _mutableParametersDic = [[NSMutableDictionary alloc] init];
+        _isCancleSendWhenExciting = NO;
         self.requestMethod = CTNetworkRequestHTTPGet;
         self.cachePolicy = CTNetworkRquestCacheNone;
     }
@@ -104,6 +106,17 @@ static NSUInteger _requestIdentifier = 0;
     return [_mutableRequestHTTPHeaderFields copy];
 }
 
+- (NSString *)requestKey
+{
+    if (!_requestKey)
+    {
+        NSURL * baseUrl = [NSURL URLWithString:[CTNetworkManager sharedManager].configuration.baseURLString];
+        _requestKey = CTKeyFromRequestAndBaseURL(self.parametersDic, baseUrl, self.interface);
+    }
+    return _requestKey;
+}
+
+
 #pragma mark - CTNetResponseHandle method -
 - (id)handleResponseObject:(id)responseObject
 {
@@ -159,7 +172,7 @@ static NSUInteger _requestIdentifier = 0;
 
 - (void)start
 {
-    [[CTNetworkManager sharedManager] sendRequest:self success:self.successBlock failure:self.failureBlock];
+    [[CTNetworkManager sharedManager] sendRequest:self];
 }
 
 
@@ -189,9 +202,7 @@ static NSUInteger _requestIdentifier = 0;
 {
     self.successBlock = successBlock;
     self.failureBlock = failureBlock;
-    [[CTNetworkManager sharedManager] sendRequest:self
-                                          success:self.successBlock
-                                          failure:self.failureBlock];
+    [[CTNetworkManager sharedManager] sendRequest:self];
 }
 
 - (void)startUploadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
@@ -201,10 +212,7 @@ static NSUInteger _requestIdentifier = 0;
     self.successBlock = successBlock;
     self.progressBlock = progressBlock;
     self.failureBlock = failureBlock;
-    [[CTNetworkManager sharedManager] sendUploadRequest:self
-                                               progress:self.progressBlock
-                                                success:self.successBlock
-                                                failure:self.failureBlock];
+    [[CTNetworkManager sharedManager] sendUploadRequest:self];
 }
 
 - (void)startDownloadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
@@ -214,16 +222,11 @@ static NSUInteger _requestIdentifier = 0;
     self.successBlock = successBlock;
     self.failureBlock = failureBlock;
     self.progressBlock = progressBlock;
-    [[CTNetworkManager sharedManager] sendDownloadRequest:self
-                                                 progress:self.progressBlock
-                                                  success:self.successBlock
-                                                  failure:self.failureBlock];
+    [[CTNetworkManager sharedManager] sendDownloadRequest:self];
 }
 
 - (void)cancle
 {
-    if (self.sessionTask && [self.sessionTask respondsToSelector:@selector(cancel)]) {
-        [self.sessionTask cancel];
-    }
+    [[CTNetworkManager sharedManager] cancelRequest:self];
 }
 @end

@@ -26,6 +26,7 @@
 {
     CTNetworkConfiguration *configuration = [[self alloc] init];
     configuration.baseURLString = baseURL;
+    configuration.SSLPinningMode = AFSSLPinningModeNone;
     return configuration;
 }
 
@@ -37,6 +38,11 @@
 - (void)prepareProcessingRequest:(CTBaseRequest *)request
 {
     
+}
+
+- (NSDictionary * _Nullable)requestParamterWithRequest:(CTBaseRequest * _Nonnull)request
+{
+    return request.parametersDic;
 }
 
 - (NSDictionary *)requestHTTPHeaderFields:(CTBaseRequest *)request {
