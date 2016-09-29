@@ -7,7 +7,9 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 
 ##有哪些功能？
 * 支持统一设置baseURL
+* 支持多域名间切换
 * 提供对HTTP请求头的统一配置以及对特殊请求头配置
+* 提供请求参数统一(和针对某写接口自定义)加密方法
 * 支持对网络请求的数据进行缓存以及配置不同的缓存策略(仅采用磁盘缓存)
 * 提供对Response解密的配置
 * 支持不同的缓存策略请求以及缓存有效期的设置
@@ -24,6 +26,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 * 配置baseURL
 * 对CTNetworkRequest进行预处理
 * 对请求统一设置请求头
+* 对参数进行加密处理方法
 * 对Response进行解密
 * 配置对某个请求是否缓存
 
@@ -41,7 +44,9 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 ```objective-c
     [[CTNetworkManager sharedManager] setNetworkConfiguration:[CTNetworkConfiguration configurationWithBaseURL:@"http://.......com/"]];```
 
-    CTBaseRequest * request = [[CTBaseRequest alloc] initWithInterface:@"api/index/appdata.json"];
+* GET 或 POST 请求
+
+    CTBaseRequest * request = [[CTBaseRequest alloc] initWithInterface:@"api/index/appdata"];
     [request startRequestWithSuccess:^(CTBaseRequest * _Nonnull request, id  _Nullable response) {
       NSLog(@" %@ %@ ", request, response);
     } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
@@ -49,12 +54,36 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
     }];
 ```
 
+* 文件上传
+      CTBaseRequest * request = [[CTBaseRequest alloc] initWithInterface:@"api/index/uploadPhoto"];
+      request.formData = ^(id <AFMultipartFormData>  _Nonnull formData) {
+            NSData * imageData = UIImageJPEGRepresentation(self.idHandImageView.image, 0.8);
+            [formData appendPartWithFileData:imageData name:@"picFile" fileName:@"photo.jpg" mimeType:@"image/jpeg"];
+        };
+      [request startUploadRequestWithProgress:^(NSProgress * _Nonnull uploadProgress) {
+           NSLog(@"%lld %lld", uploadProgress.totalUnitCount, uploadProgress.completedUnitCount);
+      } success:^(VJBaseRequest * _Nonnull request, id  _Nullable responseObj) {
+           NSLog(@"responseObj = %@", responseObj);
+      } failure:^(VJBaseRequest * _Nonnull request, NSError * _Nullable error) {
+           NSLog(@"error = %@", error);
+      }];
+
+* 文件下载
+        [[CTNetworkManager sharedManager] setNetworkConfiguration:[CTNetworkConfiguration     configurationWithBaseURL:@"http://p3.v.iask.com/777/94/88271092_2.jpg"]];
+    CTBaseRequest *request = [[CTBaseRequest alloc] initWithInterface:@""];
+    request.fileName = @"test";
+    [request startDownloadRequestWithProgress:^(NSProgress * _Nonnull downloadProgress) {
+        NSLog(@"总: %lld  下载:%lld", downloadProgress.totalUnitCount, downloadProgress.completedUnitCount);
+    } success:^(CTBaseRequest * _Nonnull request, id  _Nullable response) {
+        NSLog(@"response %@", response);
+    } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
+        NSLog(@"error = %@", error);
+    }];
+
 ##Podfile
 ```
  platform :ios, '7.0'
- pod "CTNetWork"
+ pod "CTNetWork", :git=>'https://git.oschina.net/vjappdeveloper/VJNetwork.git'
  ```
-
-##感谢
-####本类库是在BGNetwork基础上进行的改造，大部分功能与BGNetwork类似，只根据自己需要进行适当改造，再次对BGNetwork的作者提出感谢
-原文主页地址 https://github.com/chunguiLiu/BGNetwork
+ 
+ 
