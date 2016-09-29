@@ -16,6 +16,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 * 扩展了批量发送请求
 * 提供成功、失败block回调
 
+
 ##类的介绍
 ####CTBAseRequest
 网络请求类，当发起一个网络请求的时候，需要子类化这个类。CTBaseRequest提供了跟业务相关的设置，例如设置是GET请求还是POST请求、请求的方法名、请求的业务参数、缓存策略、请求头等等。当需要发起一个请求时，使用startRequestWithSuccess发起请求，使用cancelRequest类方法取消请求。
