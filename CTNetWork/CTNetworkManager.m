@@ -1,6 +1,6 @@
 //
 //  CTNetworkManager.m
-//  CTNetWork
+//  CTNetwork
 //
 //  Created by Admin on 16/5/30.
 //  Copyright © 2016年 Excalibur-Tong. All rights reserved.

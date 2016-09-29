@@ -1,6 +1,6 @@
 //
 //  CTBatchBaseRequest.m
-//  CTNetWork
+//  CTNetwork
 //
 //  Created by ZhiTong on 16/6/4.
 //  Copyright © 2016年 Excalibur-Tong. All rights reserved.
