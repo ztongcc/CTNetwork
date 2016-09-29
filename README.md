@@ -52,7 +52,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
     } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
       NSLog(@"%@ ", error);
     }];
-```
+
 
 * 文件上传
       CTBaseRequest * request = [[CTBaseRequest alloc] initWithInterface:@"api/index/uploadPhoto"];
@@ -79,6 +79,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
     } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
         NSLog(@"error = %@", error);
     }];
+```
 
 ##Podfile
 ```
