@@ -1,5 +1,5 @@
 # CTNetwork
-A network framework based on AFNetWorking 
+A network framework based on AFNetworking 
 
 
 ##CTNetwork是什么？
