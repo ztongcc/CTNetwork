@@ -85,7 +85,7 @@ CTNetwork是一个基于**AFNetworking**封装的一个网络框架，它主要�
 ##Podfile
 ```
  platform :ios, '7.0'
- pod "CTNetWork", :git=>'https://git.oschina.net/vjappdeveloper/VJNetwork.git'
+ pod "CTNetWork", :git=>'https://github.com/Excalibur-CT/CTNetWork'
  ```
  
  
