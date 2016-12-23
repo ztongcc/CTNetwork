@@ -1,6 +1,6 @@
 //
 //  CTNetworkConfiguration.m
-//  CTNetwork
+//  CTNetWork
 //
 //  Created by Admin on 16/5/30.
 //  Copyright © 2016年 Excalibur-Tong. All rights reserved.
@@ -27,6 +27,8 @@
     CTNetworkConfiguration *configuration = [[self alloc] init];
     configuration.baseURLString = baseURL;
     configuration.SSLPinningMode = AFSSLPinningModeNone;
+    configuration.allowInvalidCertificates = YES;
+    configuration.validatesDomainName = NO;
     return configuration;
 }
 

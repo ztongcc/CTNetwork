@@ -27,6 +27,8 @@
     CTNetworkConfiguration *configuration = [[self alloc] init];
     configuration.baseURLString = baseURL;
     configuration.SSLPinningMode = AFSSLPinningModeNone;
+    configuration.allowInvalidCertificates = YES;
+    configuration.validatesDomainName = NO;
     return configuration;
 }
 

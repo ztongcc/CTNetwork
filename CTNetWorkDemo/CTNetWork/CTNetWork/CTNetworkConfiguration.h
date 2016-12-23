@@ -105,6 +105,12 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 
 @property (nonatomic, assign)AFSSLPinningMode SSLPinningMode;
 
+//是否允许CA不信任的证书通过 默认 YES
+@property (nonatomic, assign)BOOL allowInvalidCertificates;
+//是否验证主机名 默认 NO
+@property (nonatomic, assign)BOOL validatesDomainName;
+
+
 @property (nonatomic, copy)NSSet * _Nonnull acceptableContentTypes;
 
 + (instancetype _Nonnull)configuration;
