@@ -382,9 +382,9 @@ static CTNetworkManager *_manager = nil;
     _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
     AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:configuration.SSLPinningMode];
     //是否允许CA不信任的证书通过
-    policy.allowInvalidCertificates = YES;
+    policy.allowInvalidCertificates = configuration.allowInvalidCertificates;
     //是否验证主机名
-    policy.validatesDomainName = YES;
+    policy.validatesDomainName = configuration.validatesDomainName;
     _sessionManager.securityPolicy = policy;
     
     //设置
