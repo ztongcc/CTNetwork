@@ -266,7 +266,7 @@ static CTNetworkManager *_manager = nil;
 
 - (void)setHttpRequestHeardFieldsWithRequest:(CTBaseRequest *)request
 {
-    NSDictionary * headerFieldValueDictionary = request.requestHTTPHeaderFields;
+    NSDictionary * headerFieldValueDictionary = [self.configuration requestHTTPHeaderFields:request];
     if (headerFieldValueDictionary != nil)
     {
         for (id httpHeaderField in headerFieldValueDictionary.allKeys)

@@ -45,15 +45,9 @@
     return request.parametersDic;
 }
 
-- (NSDictionary *)requestHTTPHeaderFields:(CTBaseRequest *)request {
-    NSMutableDictionary *allHTTPHeaderFileds = [@{
-                                                  @"Content-Type":@"application/x-www-form-urlencoded;charset=utf-8",
-                                                  @"User-Agent":@"iPhone"
-                                                  } mutableCopy];
-    [request.requestHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, BOOL *stop) {
-        allHTTPHeaderFileds[key] = obj;
-    }];
-    return allHTTPHeaderFileds;
+- (NSDictionary *)requestHTTPHeaderFields:(CTBaseRequest *)request
+{
+    return request.requestHTTPHeaderFields;
 }
 
 - (NSData *)decryptResponseData:(NSData *)responseData response:(NSURLResponse *)response request:(CTBaseRequest *)request
