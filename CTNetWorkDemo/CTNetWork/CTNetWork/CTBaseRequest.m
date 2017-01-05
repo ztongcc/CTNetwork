@@ -32,7 +32,7 @@ static NSUInteger _requestIdentifier = 0;
 
 - (void)dealloc
 {
-        NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
+    NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
 }
 
 - (instancetype)init
@@ -195,6 +195,7 @@ static NSUInteger _requestIdentifier = 0;
 @end
 
 @implementation CTBaseRequest (CTNetworkManager)
+
 #pragma mark - class method
 
 - (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock

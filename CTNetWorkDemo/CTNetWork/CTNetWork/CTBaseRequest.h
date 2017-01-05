@@ -54,6 +54,14 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
     CTNetworkRequestCacheDataAndReadCacheLoadData,
 };
 
+///  Request priority
+typedef NS_ENUM(NSInteger, CTRequestPriority) {
+    CTRequestPriorityLow = -4L,
+    CTRequestPriorityDefault = 0,
+    CTRequestPriorityHigh = 4,
+};
+
+
 #pragma mark -  block
 
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
@@ -104,6 +112,9 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
  *  请求Session Task
  */
 @property (nonatomic, readonly, nullable) NSURLSessionDataTask * sessionTask;
+
+///  The priority of the request. Effective only on iOS 8+. Default is `CTRequestPriorityDefault`.
+@property (nonatomic) CTRequestPriority requestPriority;
 
 /**
  *  请求成功Block
@@ -221,7 +232,6 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @interface CTBaseRequest (CTNetworkManager)
 
 @property (nonatomic,strong, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
-
 /**
  *  发送网络请求
  *

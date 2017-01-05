@@ -1,6 +1,6 @@
 //
 //  CTBaseRequest.m
-//  CTNetwork
+//  CTNetWork
 //
 //  Created by Admin on 16/5/30.
 //  Copyright © 2016年 Excalibur-Tong. All rights reserved.
@@ -32,7 +32,7 @@ static NSUInteger _requestIdentifier = 0;
 
 - (void)dealloc
 {
-        NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
+    NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
 }
 
 - (instancetype)init
@@ -106,6 +106,7 @@ static NSUInteger _requestIdentifier = 0;
     return [_mutableRequestHTTPHeaderFields copy];
 }
 
+
 - (NSString *)requestKey
 {
     if (!_requestKey)
@@ -115,7 +116,6 @@ static NSUInteger _requestIdentifier = 0;
     }
     return _requestKey;
 }
-
 
 #pragma mark - CTNetResponseHandle method -
 - (id)handleResponseObject:(id)responseObject
@@ -195,6 +195,7 @@ static NSUInteger _requestIdentifier = 0;
 @end
 
 @implementation CTBaseRequest (CTNetworkManager)
+
 #pragma mark - class method
 
 - (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock

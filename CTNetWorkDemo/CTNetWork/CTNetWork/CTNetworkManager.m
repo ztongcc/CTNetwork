@@ -345,6 +345,24 @@ static CTNetworkManager *_manager = nil;
         default:
             break;
     }
+    
+    if ([request.sessionTask respondsToSelector:@selector(priority)])
+    {
+        switch (request.requestPriority)
+        {
+            case CTRequestPriorityHigh:
+                request.sessionTask.priority = NSURLSessionTaskPriorityHigh;
+                break;
+            case CTRequestPriorityLow:
+                request.sessionTask.priority = NSURLSessionTaskPriorityLow;
+                break;
+            case CTRequestPriorityDefault:
+                /*!!fall through*/
+            default:
+                request.sessionTask.priority = NSURLSessionTaskPriorityDefault;
+                break;
+        }
+    }
 }
 
 

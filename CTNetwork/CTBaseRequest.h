@@ -1,6 +1,6 @@
 //
 //  CTBaseRequest.h
-//  CTNetwork
+//  CTNetWork
 //
 //  Created by Admin on 16/5/30.
 //  Copyright © 2016年 Excalibur-Tong. All rights reserved.
@@ -54,6 +54,14 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
     CTNetworkRequestCacheDataAndReadCacheLoadData,
 };
 
+///  Request priority
+typedef NS_ENUM(NSInteger, CTRequestPriority) {
+    CTRequestPriorityLow = -4L,
+    CTRequestPriorityDefault = 0,
+    CTRequestPriorityHigh = 4,
+};
+
+
 #pragma mark -  block
 
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
@@ -103,27 +111,30 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  请求Session Task
  */
-@property (nonatomic, readonly) NSURLSessionDataTask * _Nullable sessionTask;
+@property (nonatomic, readonly, nullable) NSURLSessionDataTask * sessionTask;
+
+///  The priority of the request. Effective only on iOS 8+. Default is `CTRequestPriorityDefault`.
+@property (nonatomic) CTRequestPriority requestPriority;
 
 /**
  *  请求成功Block
  */
-@property (nonatomic, copy)CTNetworkSuccessBlock _Nullable successBlock;
+@property (nonatomic, copy, nullable)CTNetworkSuccessBlock successBlock;
 
 /**
  *  请求失败Block
  */
-@property (nonatomic, copy)CTNetworkFailureBlock _Nullable failureBlock;
+@property (nonatomic, copy, nullable)CTNetworkFailureBlock failureBlock;
 
 /**
  *  上传/下载进度
  */
-@property (nonatomic, copy)CTNetworkProgressBlock _Nullable progressBlock;
+@property (nonatomic, copy, nullable)CTNetworkProgressBlock progressBlock;
 
 /**
  *  下载完成Block
  */
-@property (nonatomic, copy)CTNetworkDownloadBlock _Nullable downloadBlock;
+@property (nonatomic, copy, nullable)CTNetworkDownloadBlock downloadBlock;
 /**
  *  HTTP请求的方法，默认GET，现支持GET和POST, DELETE , PUT
  */
@@ -147,16 +158,16 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  请求时用到的临时缓存Key
  */
-@property (nonatomic, readonly) NSString * _Nonnull requestKey;
+@property (nonatomic, readonly, nonnull) NSString * requestKey;
 
 /**
  *  参数字典
  */
-@property (nonatomic, copy) NSDictionary * _Nonnull parametersDic;
+@property (nonatomic, copy, nonnull) NSDictionary *  parametersDic;
 /**
  *  请求头
  */
-@property (nonatomic, copy, readonly) NSDictionary * _Nonnull requestHTTPHeaderFields;
+@property (nonatomic, readonly, nonnull) NSDictionary * requestHTTPHeaderFields;
 
 /**
  *  初始化方法
@@ -221,7 +232,6 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @interface CTBaseRequest (CTNetworkManager)
 
 @property (nonatomic,strong, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
-
 /**
  *  发送网络请求
  *
