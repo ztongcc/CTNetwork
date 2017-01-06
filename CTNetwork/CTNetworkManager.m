@@ -7,12 +7,19 @@
 //
 
 #import "CTNetworkManager.h"
-#import "CTHTTPSessionManager.h"
+
+#define CTLock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
+#define CTUnlock() dispatch_semaphore_signal(self->_lock)
+
 
 static CTNetworkManager *_manager = nil;
 
 @interface CTNetworkManager ()
-@property (nonatomic, strong) CTHTTPSessionManager * sessionManager;
+{
+    dispatch_semaphore_t _lock;
+}
+
+@property (nonatomic, strong) AFHTTPSessionManager * sessionManager;
 @property (nonatomic, strong) CTNetworkCache * cache;
 @property (nonatomic, strong) dispatch_queue_t dataHandleQueue;
 /**
@@ -50,6 +57,8 @@ static CTNetworkManager *_manager = nil;
         //缓存
         _cache = [CTNetworkCache sharedCache];
         
+        _lock = dispatch_semaphore_create(1);
+        
         //数据处理队列
         _dataHandleQueue = dispatch_queue_create("com.CTNEtworkManager.dataHandleQueue", DISPATCH_QUEUE_CONCURRENT);
         
@@ -62,6 +71,7 @@ static CTNetworkManager *_manager = nil;
 
 - (NSString *)buildRequestUrl:(CTBaseRequest *)request
 {
+    NSAssert(_configuration, @"请先使用CTNetworkConfiguration 设置BaseUrl");
     NSString *detailUrl = [request interface];
     if ([detailUrl hasPrefix:@"http"]) {
         return detailUrl;
@@ -74,7 +84,7 @@ static CTNetworkManager *_manager = nil;
 #pragma mark - download request -
 - (void)sendDownloadRequest:(CTBaseRequest *)request
 {
-    
+    NSAssert(self.baseURL, @"请先使用CTNetworkConfiguration 设置BaseUrl");
     NSString * requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
     NSString * fileName = [self downloadRequestFileName:request];
     if (request.cachePolicy == CTNetworkRquestCacheNone)
@@ -134,14 +144,17 @@ static CTNetworkManager *_manager = nil;
                     //删除断点续传文件
                     [self.cache removeCacheForFileName:resumeDataFileName];
                 }
+                CTLock();
                 self.tempDownloadTaskDic[requestURLString] = nil;
+                CTUnlock();
                 [self handleResultWithDownloadRequest:request filePath:filePath error:error];
             }];
             
             [task resume];
             //save
+            CTLock();
             self.tempDownloadTaskDic[requestURLString] = task;
-            
+            CTUnlock();
         }else {
             //无缓存，则重新下载
             NSMutableURLRequest *httpRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:requestURLString]];
@@ -157,13 +170,17 @@ static CTNetworkManager *_manager = nil;
 
             } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
                 //清空task
+                CTLock();
                 self.tempDownloadTaskDic[requestURLString] = nil;
+                CTUnlock();
                 [self handleResultWithDownloadRequest:request filePath:filePath error:error];
             }];
             
             [task resume];
             //save
+            CTLock();
             self.tempDownloadTaskDic[requestURLString] = task;
+            CTUnlock();
         }
     }];
 }
@@ -293,7 +310,9 @@ static CTNetworkManager *_manager = nil;
             return;
         }
     }
+    CTLock();
     self.tempRequestDic[requestKey] = request;
+    CTUnlock();
     
     NSString * url = [self buildRequestUrl:request];
     NSLog(@"CTRequest url %@", url);
@@ -396,8 +415,8 @@ static CTNetworkManager *_manager = nil;
     NSParameterAssert(configuration);
     NSParameterAssert(configuration.baseURLString);
     
-    // CTHTTPSessionManager
-    _sessionManager = [[CTHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
+    // AFHTTPSessionManager
+    _sessionManager = [[AFHTTPSessionManager alloc] initWithBaseURL:[NSURL URLWithString:configuration.baseURLString]];
     AFSecurityPolicy *policy = [AFSecurityPolicy policyWithPinningMode:configuration.SSLPinningMode];
     //是否允许CA不信任的证书通过
     policy.allowInvalidCertificates = configuration.allowInvalidCertificates;
@@ -515,28 +534,27 @@ static CTNetworkManager *_manager = nil;
  */
 - (void)removeTempRequest:(CTBaseRequest *)request
 {
+    CTLock();
     [self.tempRequestDic removeObjectForKey:request.requestKey];
+    CTUnlock();
 }
 
 #pragma mark - cancel request
 - (void)cancelRequestWithUrl:(NSString *)url
 {
-    [self.sessionManager cancelTaskWithUrl:url];
+    [self cancelTaskWithUrl:url];
 }
 
 - (void)cancelRequest:(CTBaseRequest * _Nonnull)request
 {
-    @synchronized (self)
+    NSString * detailUrl = request.interface;
+    if (![detailUrl hasPrefix:@"http"])
     {
-        NSString * detailUrl = request.interface;
-        if (![detailUrl hasPrefix:@"http"])
-        {
-            detailUrl = [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
-        }
-        [self.sessionManager cancelTaskWithUrl:detailUrl];
-        request.successBlock = nil;
-        request.failureBlock = nil;
+        detailUrl = [NSString stringWithFormat:@"%@%@", _configuration.baseURLString, detailUrl];
     }
+    [self cancelTaskWithUrl:detailUrl];
+    request.successBlock = nil;
+    request.failureBlock = nil;
 }
 
 
@@ -553,4 +571,94 @@ static CTNetworkManager *_manager = nil;
         self.tempDownloadTaskDic[requestURLString] = nil;
     }];
 }
+
+- (void)cancelTaskWithUrl:(NSString *)url
+{
+    CTLock();
+    [self.sessionManager.tasks enumerateObjectsUsingBlock:^(NSURLSessionTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop)
+    {
+        NSString *taskUrl = obj.currentRequest.URL.absoluteString;
+        if([taskUrl rangeOfString:url].location != NSNotFound)
+        {
+            [obj cancel];
+            * stop = YES;
+        }
+    }];
+    CTUnlock();
+}
+
+@end
+
+
+@implementation CTNetworkManager (Core)
+
++ (void)setNetConfig:(CTNetworkConfigBlock _Nonnull)configBlock
+{
+    CTNetworkConfiguration * config = [CTNetworkConfiguration configuration];
+    configBlock(config);
+    [[CTNetworkManager sharedManager] setNetworkConfiguration:config];
+}
+
+
++ (CTBaseRequest * _Nonnull)startGET:(CTNetworkRequestBlock _Nonnull)reqBlock
+                             success:(CTNetworkSuccessBlock _Nullable)successBlock
+                             failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] init];
+    req.requestMethod = CTNetworkRequestHTTPGet;
+    req.successBlock = successBlock;
+    req.failureBlock = failureBlock;
+    NSAssert(reqBlock, @"请设置请求接口 (interface)");
+    reqBlock(req);
+    [[CTNetworkManager sharedManager] sendRequest:req];
+    return req;
+}
+
++ (CTBaseRequest * _Nonnull)startPOST:(CTNetworkRequestBlock _Nonnull)reqBlock
+                              success:(CTNetworkSuccessBlock _Nullable)successBlock
+                              failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] init];
+    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.successBlock = successBlock;
+    req.failureBlock = failureBlock;
+    NSAssert(reqBlock, @"请设置请求接口 (interface)");
+    reqBlock(req);
+    [[CTNetworkManager sharedManager] sendRequest:req];
+    return req;
+}
+
++ (CTBaseRequest * _Nonnull)startUpload:(CTNetworkRequestBlock _Nonnull)reqBlock
+                               progress:(CTNetworkProgressBlock _Nullable)progressBlock
+                                success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] init];
+    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.progressBlock = progressBlock;
+    req.successBlock = successBlock;
+    req.failureBlock = failureBlock;
+    NSAssert(reqBlock, @"请设置请求接口 (interface)");
+    reqBlock(req);
+    [[CTNetworkManager sharedManager] sendUploadRequest:req];
+    return req;
+}
+
+
++ (CTBaseRequest * _Nonnull)startDownload:(CTNetworkRequestBlock _Nonnull)reqBlock
+                                 progress:(CTNetworkProgressBlock _Nullable)progressBlock
+                                  success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                  failure:(CTNetworkFailureBlock _Nullable)failureBlock
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] init];
+    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.progressBlock = progressBlock;
+    req.successBlock = successBlock;
+    req.failureBlock = failureBlock;
+    NSAssert(reqBlock, @"请设置请求接口 (interface)");
+    reqBlock(req);
+    [[CTNetworkManager sharedManager] sendDownloadRequest:req];
+    return req;
+}
+
 @end

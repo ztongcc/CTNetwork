@@ -8,18 +8,11 @@
 
 #import "CTNetworkConfiguration.h"
 
-
-@interface CTNetworkConfiguration ()
-
-@property(nonatomic, strong) NSString *baseURLString;
-
-@end
-
 @implementation CTNetworkConfiguration
 
 + (instancetype)configuration
 {
-    return [self configurationWithBaseURL: @""];
+    return [self configurationWithBaseURL:@""];
 }
 
 + (instancetype _Nonnull)configurationWithBaseURL:(NSString *)baseURL
@@ -33,9 +26,6 @@
 }
 
 #pragma mark - BGNetworkConfiguration
-- (NSString *)baseURLString {
-    return _baseURLString;
-}
 
 - (void)prepareProcessingRequest:(CTBaseRequest *)request
 {

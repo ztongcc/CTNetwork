@@ -9,7 +9,6 @@
 #ifndef CTNetwork_h
 #define CTNetwork_h
 
-#import "CTHTTPSessionManager.h"
 #import "CTBaseRequest.h"
 #import "CTNetworkManager.h"
 #import "CTNetworkCache.h"

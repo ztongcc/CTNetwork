@@ -78,3 +78,29 @@
 
 
 @end
+
+
+@interface CTNetworkManager (Core)
+
++ (void)setNetConfig:(CTNetworkConfigBlock _Nonnull)configBlock;
+
+
++ (CTBaseRequest * _Nonnull)startGET:(CTNetworkRequestBlock _Nonnull)reqBlock
+                             success:(CTNetworkSuccessBlock _Nullable)successBlock
+                             failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
++ (CTBaseRequest * _Nonnull)startPOST:(CTNetworkRequestBlock _Nonnull)reqBlock
+                              success:(CTNetworkSuccessBlock _Nullable)successBlock
+                              failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
+
++ (CTBaseRequest * _Nonnull)startUpload:(CTNetworkRequestBlock _Nonnull)reqBlock
+                               progress:(CTNetworkProgressBlock _Nullable)progressBlock
+                                success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+
++ (CTBaseRequest * _Nonnull)startDownload:(CTNetworkRequestBlock _Nonnull)reqBlock
+                                 progress:(CTNetworkProgressBlock _Nullable)progressBlock
+                                  success:(CTNetworkSuccessBlock _Nullable)successBlock
+                                  failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+@end

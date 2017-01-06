@@ -25,13 +25,6 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 
 @protocol CTNetworkConfiguration <NSObject>
 
-@required
-/**
- *  基础地址字符串
- */
-@property (nonatomic, strong, readonly) NSString * _Nonnull baseURLString;
-
-
 @optional
 /**
  *  在请求以前，对request预处理一下，默认不处理
@@ -67,7 +60,9 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
  *
  *  @return 解密后的数据
  */
-- (NSData * _Nullable)decryptResponseData:(NSData * _Nonnull)responseData response:(NSURLResponse * _Nonnull)response request:(CTBaseRequest * _Nonnull)request;
+- (NSData * _Nullable)decryptResponseData:(NSData * _Nonnull)responseData
+                                 response:(NSURLResponse * _Nonnull)response
+                                  request:(CTBaseRequest * _Nonnull)request;
 
 /**
  *  是否应该缓存当前的数据，里面根据request.cachePolicy来进行判断。若是根据服务器返回的一个字段来判断是否应该返回数据，子类覆写此方法
@@ -89,6 +84,13 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 
 
 @interface CTNetworkConfiguration : NSObject<CTNetworkConfiguration>
+
+/**
+ *  baseUrl
+ */
+
+@property (nonatomic, copy) NSString * _Nonnull baseURLString;
+
 /**
  *  超时时间
  */
@@ -98,6 +100,7 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
  *   default CTRequestSerializerTypeJSON
  */
 @property (nonatomic, assign)CTRequestSerializerType requestType;
+
 /**
  *   default CTResponseSerializerTypeJSON
  */
@@ -107,6 +110,7 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 
 //是否允许CA不信任的证书通过 默认 YES
 @property (nonatomic, assign)BOOL allowInvalidCertificates;
+
 //是否验证主机名 默认 NO
 @property (nonatomic, assign)BOOL validatesDomainName;
 

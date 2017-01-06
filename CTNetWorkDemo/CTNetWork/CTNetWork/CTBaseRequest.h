@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AFNetworking.h>
 
-@class CTBaseRequest;
+@class CTBaseRequest, CTNetworkConfiguration;
 
 typedef NS_ENUM(NSInteger, CTNetworkRequestHTTPMethod){
     /**
@@ -65,6 +65,9 @@ typedef NS_ENUM(NSInteger, CTRequestPriority) {
 #pragma mark -  block
 
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
+
+typedef void(^CTNetworkConfigBlock)(CTNetworkConfiguration * _Nonnull config);
+typedef void(^CTNetworkRequestBlock)(CTBaseRequest * _Nonnull req);
 typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable responseObj);
 typedef void(^CTNetworkDownloadBlock)(CTBaseRequest  * _Nonnull request, NSURL * _Nullable filePath);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);

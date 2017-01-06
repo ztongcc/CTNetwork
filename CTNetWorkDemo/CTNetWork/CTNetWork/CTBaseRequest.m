@@ -47,6 +47,7 @@ static NSUInteger _requestIdentifier = 0;
     }
     return self;
 }
+
 - (instancetype)initWithInterface:(NSString * _Nullable)interface
 {
     self = [self init];
@@ -231,3 +232,5 @@ static NSUInteger _requestIdentifier = 0;
     [[CTNetworkManager sharedManager] cancelRequest:self];
 }
 @end
+
+

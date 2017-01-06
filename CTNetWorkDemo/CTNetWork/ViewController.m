@@ -69,6 +69,18 @@
     } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
         NSLog(@"%@ ", error);
     }];
+    
+    [CTNetworkManager startGET:^(CTBaseRequest * _Nonnull req) {
+        req.interface = @"dewdewde";
+    } success:^(CTBaseRequest * _Nonnull request, id  _Nullable responseObj) {
+        
+    } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {
+        
+    }];
+    
+    [CTNetworkManager setNetConfig:^(CTNetworkConfiguration * _Nonnull config) {
+        config.baseURLString = @"fefew";
+    }];
 }
 
 - (void)downloadRequestExample
