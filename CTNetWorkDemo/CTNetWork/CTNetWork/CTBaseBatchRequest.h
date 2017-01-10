@@ -12,7 +12,7 @@
 
 @interface CTBaseBatchRequest : NSObject
 
-@property (nonatomic, readonly) NSArray * _Nonnull requestArray;
+@property (nonatomic, strong) NSArray * _Nonnull requestArray;
 
 /**
  *  当某个请求失败后，是否还继续加载其它请求，默认YES

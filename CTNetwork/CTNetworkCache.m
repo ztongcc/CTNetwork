@@ -121,7 +121,6 @@
     }
     dispatch_async(self.workQueue, ^{
         NSString *cachePath = [self defaultCachePathForFileName:fileName];
-        NSLog(@"-- 读取缓存 %@", cachePath);
         long long seconds = [self cacheFileDuration:cachePath];
         if (seconds < 0 || seconds > effectTime) {
             [self removeCacheForFileName:fileName];
@@ -319,7 +318,8 @@ inline NSData * CTDataFromJsonObj(id jsonObj)
     NSError *error;
     id data = nil;
     //JSON obj
-    if (jsonObj && [NSJSONSerialization isValidJSONObject:jsonObj]){
+    if (jsonObj && [NSJSONSerialization isValidJSONObject:jsonObj])
+    {
         data = [NSJSONSerialization dataWithJSONObject:jsonObj options:NSJSONWritingPrettyPrinted error:&error];
     }
     if (data != nil && error == nil){

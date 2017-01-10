@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <AFNetworking.h>
 
-@class CTBaseRequest, CTNetworkConfiguration;
+@class CTBaseRequest, CTNetworkConfiguration, CTBaseBatchRequest;
 
 typedef NS_ENUM(NSInteger, CTNetworkRequestHTTPMethod){
     /**
@@ -35,23 +35,23 @@ typedef NS_ENUM(NSInteger, CTNetworkRequestHTTPMethod){
 /**
  *  网络请求缓存策略
  */
-typedef NS_ENUM(NSInteger, CTNetworkRequestCachePolicy){
+typedef NS_ENUM(NSInteger, CTRequestCachePolicy){
     /**
      *  不进行缓存
      */
-    CTNetworkRquestCacheNone,
+    CTRequestCacheNone,
     /**
      *  如果有缓存则仅仅读取缓存，不再请求网络, 无缓存则请求网络，请求到数据后缓存数据
      */
-    CTNetworkRequestCacheDataAndReadCacheOnly,
+    CTRequestCacheDataAndReadCacheOnly,
     /**
      *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 (此情况只会走一次成功block, 即读取缓存成功调用一次)
      */
-    CTNetworkRequestCacheDataAndRefreshCacheData,
+    CTRequestCacheDataAndRefreshCacheData,
     /**
      *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 （此情况会走两次成功的block，即读取缓存成功调用一次，请求网络成功再调用一次）
      */
-    CTNetworkRequestCacheDataAndReadCacheLoadData,
+    CTRequestCacheDataAndReadCacheLoadData,
 };
 
 ///  Request priority
@@ -67,29 +67,27 @@ typedef NS_ENUM(NSInteger, CTRequestPriority) {
 typedef void(^CTMultipartFormData) (id <AFMultipartFormData>  _Nonnull formData);
 
 typedef void(^CTNetworkConfigBlock)(CTNetworkConfiguration * _Nonnull config);
-typedef void(^CTNetworkRequestBlock)(CTBaseRequest * _Nonnull req);
+typedef void(^CTNetworkRequestBlock)(CTBaseRequest  * _Nonnull req);
+typedef NSArray <CTBaseRequest*>* _Nonnull(^CTNetworkBatchReqBlock)(CTBaseBatchRequest * _Nonnull req);
+typedef void(^CTNetworkProgressBlock)(NSProgress    * _Nonnull progress);
 typedef void(^CTNetworkSuccessBlock)(CTBaseRequest  * _Nonnull request, id  _Nullable responseObj);
-typedef void(^CTNetworkDownloadBlock)(CTBaseRequest  * _Nonnull request, NSURL * _Nullable filePath);
 typedef void(^CTNetworkFailureBlock)(CTBaseRequest  * _Nonnull request, NSError *_Nullable error);
-typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
+typedef void(^CTNetworkDownloadBlock)(CTBaseRequest * _Nonnull request, NSURL * _Nullable filePath, NSError * _Nullable error);
 
+typedef NSURL * _Nonnull (^CTNetworkDestinationBlock)(CTBaseRequest * _Nonnull request,NSURL * _Nullable targetPath, NSURLResponse * _Nullable response);
+
+typedef void (^CTNetworkBatchSuccessBlock)(CTBaseRequest * _Nonnull request, id _Nullable responseObj);
+typedef void (^CTNetworkBatchFailureBlock)(CTBaseRequest * _Nonnull request, NSError * _Nullable error);
+typedef void (^CTNetworkBatchComplectBlock)(CTBaseBatchRequest * _Nonnull request, BOOL isFinish);
 @protocol CTNetworkRequestDelegate;
-@protocol CTNetResponseHandle <NSObject>
-/**
- *  处理请求到的数据，父类默认不处理直接返回，子类覆写此方法进行处理
- *
- *  @param responseObject 请求到的数据
- *
- *  @return 处理之后的数据
- */
-- (id _Nullable)handleResponseObject:(id _Nonnull)responseObject;
-
-@end
 
 #pragma mark - CTNetworkRequest
 
 
-@interface CTBaseRequest : NSObject <NSCopying, CTNetResponseHandle>
+@interface CTBaseRequest : NSObject <NSCopying>
+
+
+@property (nonatomic, assign)NSUInteger tag;
 /**
  *  请求标识码，每个请求都拥有唯一的标示
  */
@@ -108,15 +106,28 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, assign) BOOL isFromCache;
 
 /**
+ *  请求是否活跃
+ */
+@property (nonatomic, assign) BOOL isExciting;
+
+/**
+ *  返回数据
+ */
+@property (nonatomic, copy) id _Nullable responseObj;
+
+/**
  *  当该请求处于活跃状态的时候再次发送是否需要过滤掉
  */
 @property (nonatomic, assign) BOOL isCancleSendWhenExciting;
+
 /**
  *  请求Session Task
  */
 @property (nonatomic, readonly, nullable) NSURLSessionDataTask * sessionTask;
 
-///  The priority of the request. Effective only on iOS 8+. Default is `CTRequestPriorityDefault`.
+/**
+ *  The priority of the request. Effective only on iOS 8+. Default is `CTRequestPriorityDefault`.
+ */
 @property (nonatomic) CTRequestPriority requestPriority;
 
 /**
@@ -130,7 +141,7 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 @property (nonatomic, copy, nullable)CTNetworkFailureBlock failureBlock;
 
 /**
- *  上传/下载进度
+ *  上传/下载进度Block
  */
 @property (nonatomic, copy, nullable)CTNetworkProgressBlock progressBlock;
 
@@ -138,6 +149,7 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
  *  下载完成Block
  */
 @property (nonatomic, copy, nullable)CTNetworkDownloadBlock downloadBlock;
+
 /**
  *  HTTP请求的方法，默认GET，现支持GET和POST, DELETE , PUT
  */
@@ -146,7 +158,7 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  缓存策略，默认为CTNetworkRquestCacheNone
  */
-@property (nonatomic, assign) CTNetworkRequestCachePolicy cachePolicy;
+@property (nonatomic, assign) CTRequestCachePolicy cachePolicy;
 
 /**
  *  上传文件时使用
@@ -166,63 +178,34 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  参数字典
  */
-@property (nonatomic, copy, nonnull) NSDictionary *  parametersDic;
+@property (nonatomic, strong, nullable) NSDictionary<NSString *, id> * parameterDict;
+
 /**
  *  请求头
  */
-@property (nonatomic, readonly, nonnull) NSDictionary * requestHTTPHeaderFields;
+@property (nonatomic, strong, nullable) NSDictionary <NSString *, NSString *> * HTTPHeaderFieldDict;
 
-/**
- *  初始化方法
- *
- *  @param interface 接口名
- *
- *  @return return value description
- */
+
+
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface;
-/**
- *  初始化方法
- *
- *  @param interface 接口名
- *  @param param     参数字典(可为nil)
- *
- *  @return
- */
+
+
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
-                                 parameter:(NSDictionary * _Nullable)param;
-/**
- *  初始化方法
- *
- *  @param interface 接口名
- *  @param policy    缓存策略
- *
- *  @return
- */
-- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
-                               cachePolicy:(CTNetworkRequestCachePolicy)policy;
-/**
- *  初始化方法
- *
- *  @param interface 接口名
- *  @param param     参数(可为nil)
- *  @param policy    缓存策略
- *
- *  @return
- */
+                                 parameter:(id _Nullable)param;
+
+
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
                                  parameter:(NSDictionary * _Nullable)param
-                               cachePolicy:(CTNetworkRequestCachePolicy)policy;
+                               cachePolicy:(CTRequestCachePolicy)policy;
 
-#pragma mark - 设置或获取请求头的内容
-- (void)setValue:(NSString * _Nonnull)value forHTTPHeaderField:(NSString * _Nonnull)field;
-- (NSString * _Nonnull)valueForHTTPHeaderField:(NSString * _Nonnull)field;
++ (CTBaseRequest * _Nonnull)request;
 
-#pragma mark - 设置参数
-- (void)setIntegerValue:(NSInteger)value forParamKey:(NSString * _Nonnull)key;
-- (void)setDoubleValue:(double)value forParamKey:(NSString * _Nonnull)key;
-- (void)setLongLongValue:(long long)value forParamKey:(NSString * _Nonnull)key;
-- (void)setBOOLValue:(BOOL)value forParamKey:(NSString * _Nonnull)key;
-- (void)setValue:(id _Nonnull)value forParamKey:(NSString * _Nonnull)key;
+
++ (CTBaseRequest * _Nonnull)requestWithInterface:(NSString * _Nonnull)interface;
+
+
++ (CTBaseRequest * _Nonnull)requestWithInterface:(NSString * _Nonnull)interface
+                                       parameter:(id _Nonnull)parameter;
 
 /**
  *  开始请求数据 (需设置successBlock 和 failureBlock)
@@ -234,13 +217,13 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 #pragma mark - CTNetworkRequest(CTNetworkManager)
 @interface CTBaseRequest (CTNetworkManager)
 
-@property (nonatomic,strong, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
+
+@property (nonatomic,strong, readwrite) NSURLSessionTask * _Nullable sessionTask;
 /**
  *  发送网络请求
  *
- *  @param successCompletionBlock 成功回调
- *  @param businessFailureBlock   业务失败回调
- *  @param networkFailureBlock    网络失败回调
+ *  @param successBlock 成功回调
+ *  @param failureBlock 网络失败回调
  */
 - (void)startRequestWithSuccess:(CTNetworkSuccessBlock _Nullable)successBlock
                         failure:(CTNetworkFailureBlock _Nullable)failureBlock;
@@ -248,9 +231,9 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  发送上传数据网络请求
  *
- *  @param successCompletionBlock 成功回调
- *  @param businessFailureBlock   业务失败回调
- *  @param networkFailureBlock    网络失败回调
+ *  @param progressBlock  上传进度回调
+ *  @param successBlock   成功回调
+ *  @param failureBlock   网络失败回调
  */
 - (void)startUploadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
                                success:(CTNetworkSuccessBlock _Nullable)successBlock
@@ -259,13 +242,12 @@ typedef void(^CTNetworkProgressBlock)(NSProgress * _Nonnull uploadProgress);
 /**
  *  发送下载文件网络请求
  *
- *  @param successCompletionBlock 成功回调
- *  @param businessFailureBlock   业务失败回调
- *  @param networkFailureBlock    网络失败回调
+ *  @param progressBlock  下载进度回调
+ *  @param successBlock   成功回调
+ *  @param failureBlock   网络失败回调
  */
 - (void)startDownloadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
-                                 success:(CTNetworkSuccessBlock _Nullable)successBlock
-                                 failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+                         complectHandler:(CTNetworkDownloadBlock _Nonnull)complectBlock;
 /**
  *  取消网络请求
  */

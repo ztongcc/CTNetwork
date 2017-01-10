@@ -34,12 +34,12 @@
 
 - (NSDictionary * _Nullable)requestParamterWithRequest:(CTBaseRequest * _Nonnull)request
 {
-    return request.parametersDic;
+    return request.parameterDict;
 }
 
 - (NSDictionary *)requestHTTPHeaderFields:(CTBaseRequest *)request
 {
-    return request.requestHTTPHeaderFields;
+    return request.HTTPHeaderFieldDict;
 }
 
 - (NSData *)decryptResponseData:(NSData *)responseData response:(NSURLResponse *)response request:(CTBaseRequest *)request
@@ -49,7 +49,10 @@
 
 - (BOOL)shouldCacheResponseData:(id)responseData task:(NSURLSessionDataTask *)task request:(CTBaseRequest *)request
 {
-    if(request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheOnly || request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData) {
+    if(request.cachePolicy == CTRequestCacheDataAndReadCacheOnly ||
+       request.cachePolicy == CTRequestCacheDataAndReadCacheLoadData ||
+       request.cachePolicy == CTRequestCacheDataAndRefreshCacheData)
+    {
         return YES;
     }
     return NO;

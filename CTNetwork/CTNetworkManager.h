@@ -12,13 +12,11 @@
 #import "CTNetworkCache.h"
 
 
+#define NET_LOG(FORMAT, ...) printf("[%s:%d行] %s\n",[[[NSString stringWithUTF8String:__FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
+
+
 @interface CTNetworkManager : NSObject
-/**
- *  网络请求单例类
- *
- *  @return <#return value description#>
- */
-+ (instancetype _Nonnull)sharedManager;
+
 /**
  *  网络缓存
  */
@@ -28,6 +26,13 @@
  *  设置网络配置
  */
 @property (nonatomic, strong, readonly) CTNetworkConfiguration * _Nonnull configuration;
+
+/**
+ *  网络请求单例类
+ *
+ *  @return <#return value description#>
+ */
++ (instancetype _Nonnull)sharedManager;
 
 /**
  *  设置网络配置
@@ -93,7 +98,6 @@
                               success:(CTNetworkSuccessBlock _Nullable)successBlock
                               failure:(CTNetworkFailureBlock _Nullable)failureBlock;
 
-
 + (CTBaseRequest * _Nonnull)startUpload:(CTNetworkRequestBlock _Nonnull)reqBlock
                                progress:(CTNetworkProgressBlock _Nullable)progressBlock
                                 success:(CTNetworkSuccessBlock _Nullable)successBlock
@@ -101,6 +105,12 @@
 
 + (CTBaseRequest * _Nonnull)startDownload:(CTNetworkRequestBlock _Nonnull)reqBlock
                                  progress:(CTNetworkProgressBlock _Nullable)progressBlock
-                                  success:(CTNetworkSuccessBlock _Nullable)successBlock
-                                  failure:(CTNetworkFailureBlock _Nullable)failureBlock;
+                          complectHandler:(CTNetworkDownloadBlock _Nonnull)complectBlock;
+
+
++ (CTBaseBatchRequest * _Nonnull)startBatch:(CTNetworkBatchReqBlock _Nonnull)batchReqBlock
+                                    success:(CTNetworkBatchSuccessBlock _Nonnull)successBlock
+                                    failure:(CTNetworkBatchFailureBlock _Nonnull)failureBlock
+                                 completion:(CTNetworkBatchComplectBlock _Nonnull)completionBlock;
+
 @end

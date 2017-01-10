@@ -97,14 +97,19 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
 @property (nonatomic, assign) NSTimeInterval timeInterval;
 
 /**
+ *  是否是调试模式
+ */
+@property (nonatomic, assign)BOOL isDebug;
+
+/**
  *   default CTRequestSerializerTypeJSON
  */
-@property (nonatomic, assign)CTRequestSerializerType requestType;
+@property (nonatomic, assign)CTRequestSerializerType requestSerializerType;
 
 /**
  *   default CTResponseSerializerTypeJSON
  */
-@property (nonatomic, assign)CTResponseSerializerType responseType;
+@property (nonatomic, assign)CTResponseSerializerType responseSerializerType;
 
 @property (nonatomic, assign)AFSSLPinningMode SSLPinningMode;
 

@@ -16,8 +16,6 @@
 @property (nonatomic, copy)void (^failureBlock)(CTBaseRequest * request, NSError * error);
 @property (nonatomic, copy)void (^completBlock)(CTBaseBatchRequest * request, BOOL isFinish);
 
-@property (nonatomic, strong) NSArray *requestArray;
-
 @end
 
 @implementation CTBaseBatchRequest

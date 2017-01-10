@@ -8,22 +8,15 @@
 
 #import "CTBaseRequest.h"
 #import "CTNetworkManager.h"
-#import "CTNetworkCache.h"
-#import <objc/runtime.h>
-
 
 static NSUInteger _requestIdentifier = 0;
 
 @interface CTBaseRequest ()
 
 @property (nonatomic, readwrite) NSURLSessionDataTask * _Nullable sessionTask;
-@property (nonatomic, strong) NSMutableDictionary *mutableParametersDic;
-@property (nonatomic, strong) NSMutableDictionary *mutableRequestHTTPHeaderFields;
+@property (nonatomic, strong) NSMutableDictionary * mutableRequestHTTPHeaderFields;
 @property (nonatomic, copy) NSString * requestKey;
 
-/**
- *  代理
- */
 @property (nonatomic, weak) id<CTNetworkRequestDelegate> delegate;
 
 @end
@@ -32,7 +25,10 @@ static NSUInteger _requestIdentifier = 0;
 
 - (void)dealloc
 {
-    NSLog(@"%@ [ - delloc - ]   requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
+    if ([CTNetworkManager sharedManager].configuration.isDebug)
+    {
+        NET_LOG(@"%@ [ - delloc - ]  requestIndentifier : %ld ", NSStringFromClass(self.class), (unsigned long)self.requestIdentifier);
+    }
 }
 
 - (instancetype)init
@@ -40,12 +36,31 @@ static NSUInteger _requestIdentifier = 0;
     if(self = [super init]){
         _requestIdentifier += 1;
         _mutableRequestHTTPHeaderFields = [[NSMutableDictionary alloc] init];
-        _mutableParametersDic = [[NSMutableDictionary alloc] init];
         _isCancleSendWhenExciting = NO;
         self.requestMethod = CTNetworkRequestHTTPGet;
-        self.cachePolicy = CTNetworkRquestCacheNone;
+        self.cachePolicy = CTRequestCacheNone;
     }
     return self;
+}
+
++ (CTBaseRequest * _Nonnull)request
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] init];
+    return req;
+}
+
++ (CTBaseRequest * _Nonnull)requestWithInterface:(NSString * _Nonnull)interface
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] initWithInterface:interface];
+    return req;
+}
+
++ (CTBaseRequest * _Nonnull)requestWithInterface:(NSString * _Nonnull)interface
+                                       parameter:(id _Nonnull)parameter
+{
+    CTBaseRequest * req = [[CTBaseRequest alloc] initWithInterface:interface];
+    req.parameterDict = parameter;
+    return req;
 }
 
 - (instancetype)initWithInterface:(NSString * _Nullable)interface
@@ -58,25 +73,19 @@ static NSUInteger _requestIdentifier = 0;
 }
 
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
-                               cachePolicy:(CTNetworkRequestCachePolicy)policy
+                                 parameter:(NSDictionary * _Nullable)param
 {
-    return [self initWithInterface:interface parameter:nil cachePolicy:CTNetworkRquestCacheNone];
+    return [self initWithInterface:interface parameter:param cachePolicy:CTRequestCacheNone];
 }
 
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
                                  parameter:(NSDictionary * _Nullable)param
-{
-    return [self initWithInterface:interface parameter:param cachePolicy:CTNetworkRquestCacheNone];
-}
-
-- (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
-                                 parameter:(NSDictionary * _Nullable)param
-                               cachePolicy:(CTNetworkRequestCachePolicy)policy
+                               cachePolicy:(CTRequestCachePolicy)policy
 {
     self = [self init];
     if (self) {
         self.interface = interface;
-        self.parametersDic = param;
+        self.parameterDict = param;
         self.cachePolicy = policy;
     }
     return self;
@@ -88,87 +97,15 @@ static NSUInteger _requestIdentifier = 0;
     return _requestIdentifier;
 }
 
-- (NSDictionary *)parametersDic
-{
-    @autoreleasepool
-    {
-        NSMutableDictionary * paramDict = [NSMutableDictionary dictionaryWithDictionary:_mutableParametersDic];
-        if (_parametersDic != nil)
-        {
-            [paramDict addEntriesFromDictionary:_parametersDic];
-        }
-        return [paramDict copy];
-    }
-
-}
-
-- (NSDictionary *)requestHTTPHeaderFields
-{
-    return [_mutableRequestHTTPHeaderFields copy];
-}
-
 
 - (NSString *)requestKey
 {
     if (!_requestKey)
     {
         NSURL * baseUrl = [NSURL URLWithString:[CTNetworkManager sharedManager].configuration.baseURLString];
-        _requestKey = CTKeyFromRequestAndBaseURL(self.parametersDic, baseUrl, self.interface);
+        _requestKey = CTKeyFromRequestAndBaseURL(self.parameterDict, baseUrl, self.interface);
     }
     return _requestKey;
-}
-
-#pragma mark - CTNetResponseHandle method -
-- (id)handleResponseObject:(id)responseObject
-{
-    return responseObject;
-}
-
-#pragma mark - 设置或获取请求头
-- (NSString *)valueForHTTPHeaderField:(NSString *)field{
-    if(!field){
-        return @"";
-    }
-    return _mutableRequestHTTPHeaderFields[field];
-}
-
-- (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field{
-    if(!field || !value){
-        return;
-    }
-    _mutableRequestHTTPHeaderFields[field] = value;
-}
-
-#pragma mark - 设置参数
-- (void)setIntegerValue:(NSInteger)value forParamKey:(NSString *)key
-{
-    [self setValue:[NSNumber numberWithInteger:value] forParamKey:key];
-}
-
-- (void)setDoubleValue:(double)value forParamKey:(NSString *)key
-{
-    [self setValue:[NSNumber numberWithDouble:value] forParamKey:key];
-}
-
-- (void)setLongLongValue:(long long)value forParamKey:(NSString *)key
-{
-    [self setValue:[NSNumber numberWithLongLong:value] forParamKey:key];
-}
-
-- (void)setBOOLValue:(BOOL)value forParamKey:(NSString *)key
-{
-    [self setValue:[NSNumber numberWithBool:value] forParamKey:key];
-}
-
-- (void)setValue:(id)value forParamKey:(NSString *)key
-{
-    if(!key){
-        return;
-    }
-    if(!value){
-        value = @"";
-    }
-    _mutableParametersDic[key] = value;
 }
 
 - (void)start
@@ -176,23 +113,22 @@ static NSUInteger _requestIdentifier = 0;
     [[CTNetworkManager sharedManager] sendRequest:self];
 }
 
-
 #pragma mark - NSCopying method
 - (id)copyWithZone:(NSZone *)zone
 {
     CTBaseRequest *request = [[[self class] allocWithZone:zone] init];
     request.mutableRequestHTTPHeaderFields = [self.mutableRequestHTTPHeaderFields mutableCopy];
-    request.mutableParametersDic = [self.mutableParametersDic mutableCopy];
     return request;
 }
 
 #pragma mark - description
 - (NSString *)description
 {
-    NSString *className = NSStringFromClass([self class]);
-    NSString *desStr = [NSString stringWithFormat:@"%@ indentifier %ld \n interface: [-  %@  -]\n param:\n%@\n", className,self.requestIdentifier, self.interface, self.parametersDic];
+    NSString * className = NSStringFromClass([self class]);
+    NSString * desStr = [NSString stringWithFormat:@"%@ indentifier %ld \n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> responseObj:\n%@", className,self.requestIdentifier, self.interface, self.parameterDict, self.HTTPHeaderFieldDict, self.responseObj];
     return desStr;
 }
+
 @end
 
 @implementation CTBaseRequest (CTNetworkManager)
@@ -218,12 +154,10 @@ static NSUInteger _requestIdentifier = 0;
 }
 
 - (void)startDownloadRequestWithProgress:(CTNetworkProgressBlock _Nullable)progressBlock
-                                 success:(CTNetworkSuccessBlock _Nullable)successBlock
-                                 failure:(CTNetworkFailureBlock _Nullable)failureBlock
+                         complectHandler:(CTNetworkDownloadBlock _Nonnull)complectBlock
 {
-    self.successBlock = successBlock;
-    self.failureBlock = failureBlock;
     self.progressBlock = progressBlock;
+    self.downloadBlock = complectBlock;
     [[CTNetworkManager sharedManager] sendDownloadRequest:self];
 }
 
