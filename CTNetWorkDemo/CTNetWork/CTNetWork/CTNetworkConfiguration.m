@@ -49,9 +49,7 @@
 
 - (BOOL)shouldCacheResponseData:(id)responseData task:(NSURLSessionDataTask *)task request:(CTBaseRequest *)request
 {
-    if(request.cachePolicy == CTRequestCacheDataAndReadCacheOnly ||
-       request.cachePolicy == CTRequestCacheDataAndReadCacheLoadData ||
-       request.cachePolicy == CTRequestCacheDataAndRefreshCacheData)
+    if(request.cachePolicy != CTCacheNone)
     {
         return YES;
     }

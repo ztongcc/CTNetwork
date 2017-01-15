@@ -11,6 +11,9 @@
 #import "CTBaseRequest.h"
 #import "CTNetworkCache.h"
 
+#define CTLock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
+#define CTUnlock() dispatch_semaphore_signal(self->_lock)
+
 
 #define NET_LOG(FORMAT, ...) printf("[%s:%d行] %s\n",[[[NSString stringWithUTF8String:__FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
 

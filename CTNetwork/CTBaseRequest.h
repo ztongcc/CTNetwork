@@ -39,19 +39,19 @@ typedef NS_ENUM(NSInteger, CTRequestCachePolicy){
     /**
      *  不进行缓存
      */
-    CTRequestCacheNone,
+    CTCacheNone,
     /**
      *  如果有缓存则仅仅读取缓存，不再请求网络, 无缓存则请求网络，请求到数据后缓存数据
      */
-    CTRequestCacheDataAndReadCacheOnly,
+    CTCacheReadCacheOnly,
     /**
      *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 (此情况只会走一次成功block, 即读取缓存成功调用一次)
      */
-    CTRequestCacheDataAndRefreshCacheData,
+    CTCacheRefreshCacheData,
     /**
      *  如果有缓存则读取缓存，读取到缓存后请求网络，请求到数据后缓存数据 （此情况会走两次成功的block，即读取缓存成功调用一次，请求网络成功再调用一次）
      */
-    CTRequestCacheDataAndReadCacheLoadData,
+    CTCacheRefreshCacheAndLoadData,
 };
 
 ///  Request priority

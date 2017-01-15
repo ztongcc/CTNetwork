@@ -9,8 +9,6 @@
 #import "CTNetworkManager.h"
 #import "CTBaseBatchRequest.h"
 
-#define CTLock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
-#define CTUnlock() dispatch_semaphore_signal(self->_lock)
 
 
 static CTNetworkManager *_manager = nil;
@@ -88,7 +86,7 @@ static CTNetworkManager *_manager = nil;
     NSAssert(self.baseURL, @"请先使用CTNetworkConfiguration 设置BaseUrl");
     NSString * requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
     NSString * fileName = [self downloadRequestFileName:request];
-    if (request.cachePolicy == CTRequestCacheNone)
+    if (request.cachePolicy == CTCacheNone)
     {
         [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName];
     }
@@ -99,17 +97,12 @@ static CTNetworkManager *_manager = nil;
              //有缓存，则直接返回
              if(object && [object isKindOfClass:[NSData class]])
              {
-                 dispatch_async(dispatch_get_main_queue(), ^{
-                     NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
-                     //保存文件
-                     if(request.downloadBlock)
-                     {
-                         request.downloadBlock(request, filePath, nil);
-                     }
-                     request.isExciting = NO;
-                 });
+                NSURL *filePath = [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
+                 request.isFromCache = YES;
+                 [self handleResultWithDownloadRequest:request filePath:filePath error:nil];
              }
-             else
+            
+             if (request.cachePolicy != CTCacheReadCacheOnly)
              {
                  [self downloadDataWithRequest:request requestURL:requestURLString fileName:fileName];
              }
@@ -149,7 +142,10 @@ static CTNetworkManager *_manager = nil;
                 CTLock();
                 self.tempDownloadTaskDic[requestURLString] = nil;
                 CTUnlock();
-                [self handleResultWithDownloadRequest:request filePath:filePath error:error];
+                if (request.cachePolicy == CTCacheRefreshCacheAndLoadData)
+                {
+                    [self handleResultWithDownloadRequest:request filePath:filePath error:error];
+                }
             }];
         }
         else
@@ -171,7 +167,10 @@ static CTNetworkManager *_manager = nil;
                 CTLock();
                 self.tempDownloadTaskDic[requestURLString] = nil;
                 CTUnlock();
-                [self handleResultWithDownloadRequest:request filePath:filePath error:error];
+                if (request.cachePolicy == CTCacheRefreshCacheAndLoadData)
+                {
+                    [self handleResultWithDownloadRequest:request filePath:filePath error:error];
+                }
             }];
         }
         [request.sessionTask resume];
@@ -189,7 +188,9 @@ static CTNetworkManager *_manager = nil;
 }
 
 
-- (NSURL * _Nullable)fileDestinationPathWithRequest:(CTBaseRequest *)req targetPath:(NSURL * _Nonnull)targetPath response:( NSURLResponse * _Nonnull)response
+- (NSURL * _Nullable)fileDestinationPathWithRequest:(CTBaseRequest *)req
+                                         targetPath:(NSURL * _Nonnull)targetPath
+                                           response:(NSURLResponse * _Nonnull)response
 {
     if(((NSHTTPURLResponse *)response).statusCode >= 400)
     {
@@ -201,6 +202,7 @@ static CTNetworkManager *_manager = nil;
         if (!fileName)
         {
             fileName = [response suggestedFilename];
+            req.fileName = fileName;
         }
         return [NSURL fileURLWithPath:[self.cache defaultCachePathForFileName:fileName]];
     }
@@ -211,18 +213,11 @@ static CTNetworkManager *_manager = nil;
                             error:(NSError *)error
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(error)
+    NSString * desStr = [NSString stringWithFormat:@"\n--------------- CTRequest download completion ---------------\n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> fileName:\n%@\n-> filePath:\n%@\n-> error:\n%@\n-------------------------------------------------------------", request.interface, request.parameterDict, request.HTTPHeaderFieldDict,request.fileName,filePath.absoluteString,error.localizedDescription];
+        NET_LOG(@"%@",desStr);
+        if(request.downloadBlock)
         {
-            if(request.failureBlock)
-            {
-                request.failureBlock(request, error);
-            }
-        }
-        else {
-            if(request.downloadBlock)
-            {
-                request.downloadBlock(request, filePath, error);
-            }
+            request.downloadBlock(request, filePath, error);
         }
         request.isExciting = NO;
     });
@@ -233,13 +228,10 @@ static CTNetworkManager *_manager = nil;
  */
 - (NSString *)downloadRequestFileName:(CTBaseRequest *)request
 {
-    NSString *requestURLString = CTURLStringFromBaseURLAndInterface(self.baseURL, request.interface);
-    NSString *cacheKey = CT_MD5(requestURLString);
-    NSString *pathExtension = [request.fileName pathExtension];
-    if (!pathExtension) {
-        pathExtension = [request.interface pathExtension];
+    NSString * fileName = [request.fileName lastPathComponent];
+    if (!fileName) {
+        fileName = [request.interface lastPathComponent];
     }
-    NSString *fileName =  pathExtension ? [cacheKey stringByAppendingPathExtension:pathExtension] : [cacheKey stringByAppendingPathExtension:@"tmp"];
     return fileName;
 }
 
@@ -277,13 +269,13 @@ static CTNetworkManager *_manager = nil;
     
     switch (request.cachePolicy)
     {
-        case CTRequestCacheNone:
+        case CTCacheNone:
             //请求网络数据
             [self startNetworkDataWithRequest:request];
             break;
-        case CTRequestCacheDataAndReadCacheOnly:
-        case CTRequestCacheDataAndRefreshCacheData:
-        case CTRequestCacheDataAndReadCacheLoadData:
+        case CTCacheReadCacheOnly:
+        case CTCacheRefreshCacheData:
+        case CTCacheRefreshCacheAndLoadData:
             //读取缓存并且请求数据
             [self readCacheWithRequest:request completion:^(CTBaseRequest *request, id responseObject)
             {
@@ -295,8 +287,8 @@ static CTNetworkManager *_manager = nil;
                     [self success:request responseObject:responseObject isFromCache:YES];
 
                     // CTBaseRequestCacheDataAndReadCacheLoadData：缓存数据成功调回并且重新请求网络
-                    if(request.cachePolicy == CTRequestCacheDataAndRefreshCacheData ||
-                       request.cachePolicy == CTRequestCacheDataAndReadCacheLoadData)
+                    if(request.cachePolicy == CTCacheRefreshCacheData ||
+                       request.cachePolicy == CTCacheRefreshCacheAndLoadData)
                     {
                         [self startNetworkDataWithRequest:request];
                     }
@@ -493,28 +485,22 @@ static CTNetworkManager *_manager = nil;
         dispatch_async(dispatch_get_main_queue(), ^{
             if(decryptData)
             {
-                if (request.cachePolicy == CTRequestCacheDataAndReadCacheOnly ||
-                    request.cachePolicy == CTRequestCacheDataAndReadCacheLoadData ||
-                    request.cachePolicy == CTRequestCacheDataAndRefreshCacheData)
+                if (request.cachePolicy != CTCacheNone)
                 {   //缓存解密之后的数据
-                    [self cacheResponseData:decryptData request:request];
-                }
-                else
-                {
                     if([self.configuration shouldCacheResponseData:decryptData task:task request:request])
                     {   //缓存解密之后的数据
                         [self cacheResponseData:decryptData request:request];
                     }
                 }
                 
-                if (request.cachePolicy != CTRequestCacheDataAndRefreshCacheData)
+                if (request.cachePolicy != CTCacheRefreshCacheData)
                 {   //成功回调
                     [self success:request responseObject:responseData isFromCache:NO];
                 }
             }
             else
             {
-                if (request.cachePolicy != CTRequestCacheDataAndRefreshCacheData)
+                if (request.cachePolicy != CTCacheRefreshCacheData)
                 {
                     NSDictionary * userInfo = @{@"interface":request.interface,
                                                 @"paramter":request.parameterDict?request.parameterDict:@""};
@@ -540,7 +526,7 @@ static CTNetworkManager *_manager = nil;
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self.configuration.isDebug)
             {
-                NET_LOG(@"VJRequest completion -------------------- \n--------------------  %@", request);
+                NET_LOG(@"%@", request);
             }
             if(request.successBlock) {
                 request.successBlock(request, responseObject);

@@ -16,8 +16,6 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-    NSLog(@"NSHomeDirectory = %@", NSHomeDirectory());
     return YES;
 }
 

@@ -9,7 +9,9 @@
 #import "CTBaseRequest.h"
 #import "CTNetworkManager.h"
 
-static NSUInteger _requestIdentifier = 0;
+static NSUInteger const K_CACHE_VALIDITY = 60;
+
+static NSUInteger K_REQUEST_INDENTIFIER = 0;
 
 @interface CTBaseRequest ()
 
@@ -33,12 +35,17 @@ static NSUInteger _requestIdentifier = 0;
 
 - (instancetype)init
 {
-    if(self = [super init]){
-        _requestIdentifier += 1;
+    if(self = [super init]) {
+        NSLock * lock = [[NSLock alloc] init];
+        [lock lock];
+        K_REQUEST_INDENTIFIER += 1;
+        _requestIdentifier = K_REQUEST_INDENTIFIER;
+        [lock unlock];
         _mutableRequestHTTPHeaderFields = [[NSMutableDictionary alloc] init];
         _isCancleSendWhenExciting = NO;
+        self.cacheValidInterval = K_CACHE_VALIDITY;
         self.requestMethod = CTNetworkRequestHTTPGet;
-        self.cachePolicy = CTRequestCacheNone;
+        self.cachePolicy = CTCacheNone;
     }
     return self;
 }
@@ -75,7 +82,7 @@ static NSUInteger _requestIdentifier = 0;
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
                                  parameter:(NSDictionary * _Nullable)param
 {
-    return [self initWithInterface:interface parameter:param cachePolicy:CTRequestCacheNone];
+    return [self initWithInterface:interface parameter:param cachePolicy:CTCacheNone];
 }
 
 - (instancetype _Nonnull)initWithInterface:(NSString * _Nullable)interface
@@ -92,11 +99,6 @@ static NSUInteger _requestIdentifier = 0;
 }
 
 #pragma mark - set or get method
-- (NSUInteger)requestIdentifier
-{
-    return _requestIdentifier;
-}
-
 
 - (NSString *)requestKey
 {
@@ -124,8 +126,7 @@ static NSUInteger _requestIdentifier = 0;
 #pragma mark - description
 - (NSString *)description
 {
-    NSString * className = NSStringFromClass([self class]);
-    NSString * desStr = [NSString stringWithFormat:@"%@ indentifier %ld \n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> responseObj:\n%@", className,self.requestIdentifier, self.interface, self.parameterDict, self.HTTPHeaderFieldDict, self.responseObj];
+    NSString * desStr = [NSString stringWithFormat:@"\n-------------------- CTRequest completion --------------------\n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> responseObj:\n%@\n-------------------------------------------------------------", self.interface, self.parameterDict, self.HTTPHeaderFieldDict, self.responseObj];
     return desStr;
 }
 
