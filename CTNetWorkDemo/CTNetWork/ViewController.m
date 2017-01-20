@@ -52,6 +52,9 @@
 {
     [CTNetworkManager startGET:^(CTBaseRequest * _Nonnull req) {
         req.interface = @"data/sk/101010100.html";
+        req.cachePolicy = CTCacheRefreshCacheAndLoadData;
+        req.isCancleSendWhenExciting = YES;
+        req.cacheValidInterval = 60;
     } success:^(CTBaseRequest * _Nonnull request, id  _Nullable responseObj) {
         
     } failure:^(CTBaseRequest * _Nonnull request, NSError * _Nullable error) {

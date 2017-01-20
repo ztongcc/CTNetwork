@@ -478,9 +478,8 @@ static CTNetworkManager *_manager = nil;
 {
     
     dispatch_async(self.dataHandleQueue, ^{
-        id responseObject = CTDataFromJsonObj(responseData);
         //对数据进行解密
-        id decryptData = [self.configuration decryptResponseData:responseObject response:task.response request:request];
+        id decryptData = [self.configuration decryptResponseData:responseData response:task.response request:request];
         //解析数据
         dispatch_async(dispatch_get_main_queue(), ^{
             if(decryptData)
@@ -489,13 +488,14 @@ static CTNetworkManager *_manager = nil;
                 {   //缓存解密之后的数据
                     if([self.configuration shouldCacheResponseData:decryptData task:task request:request])
                     {   //缓存解密之后的数据
-                        [self cacheResponseData:decryptData request:request];
+                        id objData = CTDataFromJsonObj(responseData);
+                        [self cacheResponseData:objData request:request];
                     }
                 }
                 
                 if (request.cachePolicy != CTCacheRefreshCacheData)
                 {   //成功回调
-                    [self success:request responseObject:responseData isFromCache:NO];
+                    [self success:request responseObject:decryptData isFromCache:NO];
                 }
             }
             else

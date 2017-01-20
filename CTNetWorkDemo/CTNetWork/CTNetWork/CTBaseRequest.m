@@ -126,7 +126,7 @@ static NSUInteger K_REQUEST_INDENTIFIER = 0;
 #pragma mark - description
 - (NSString *)description
 {
-    NSString * desStr = [NSString stringWithFormat:@"\n-------------------- CTRequest completion --------------------\n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> responseObj:\n%@\n-------------------------------------------------------------", self.interface, self.parameterDict, self.HTTPHeaderFieldDict, self.responseObj];
+    NSString * desStr = [NSString stringWithFormat:@"\n-------------------- CTRequest completion --------------------\n-> interface: [-  %@  -]\n-> param:\n%@\n-> Unusual HTTPHeader:\n%@\n-> From cache: %@\n-> responseObj:\n%@\n-------------------------------------------------------------", self.interface, self.parameterDict, self.HTTPHeaderFieldDict,self.isFromCache?@"YES":@"NO", self.responseObj];
     return desStr;
 }
 

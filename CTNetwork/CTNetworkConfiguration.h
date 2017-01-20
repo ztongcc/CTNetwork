@@ -71,12 +71,7 @@ typedef NS_ENUM(NSInteger, CTResponseSerializerType)
  *  @param task         task
  *  @param request      请求
  *
- *  @return 根据request.cachePolicy来判断
- *  @code
- if(request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheOnly || request.cachePolicy == CTNetworkRequestCacheDataAndReadCacheLoadData) {
- return YES;
- }
- return NO;
+ *  @return 是否缓存
  */
 - (BOOL)shouldCacheResponseData:(id _Nullable)responseData task:(NSURLSessionDataTask * _Nonnull)task request:(CTBaseRequest * _Nonnull)request;
 
