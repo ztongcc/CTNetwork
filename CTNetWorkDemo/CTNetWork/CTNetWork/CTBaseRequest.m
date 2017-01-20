@@ -44,7 +44,7 @@ static NSUInteger K_REQUEST_INDENTIFIER = 0;
         _mutableRequestHTTPHeaderFields = [[NSMutableDictionary alloc] init];
         _isCancleSendWhenExciting = NO;
         self.cacheValidInterval = K_CACHE_VALIDITY;
-        self.requestMethod = CTNetworkRequestHTTPGet;
+        self.requestMethod = CTHTTPMethodGET;
         self.cachePolicy = CTCacheNone;
     }
     return self;

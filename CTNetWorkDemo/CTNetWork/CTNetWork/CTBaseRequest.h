@@ -11,24 +11,24 @@
 
 @class CTBaseRequest, CTNetworkConfiguration, CTBaseBatchRequest;
 
-typedef NS_ENUM(NSInteger, CTNetworkRequestHTTPMethod){
+typedef NS_ENUM(NSInteger, CTRequestHTTPMethod){
     /**
      *  GET请求
      */
-    CTNetworkRequestHTTPGet,
+    CTHTTPMethodGET,
     /**
      *  POST请求
      */
-    CTNetworkRequestHTTPPost,
+    CTHTTPMethodPOST,
     /**
      *  DELETE请求
      */
-    CTNetworkRequestHTTPDelete,
+    CTHTTPMethodDELETE,
     
     /**
      *  PUT请求
      */
-    CTNetworkRequestHTTPPut,
+    CTHTTPMethodPUT,
 };
 
 
@@ -153,7 +153,7 @@ typedef void (^CTNetworkBatchComplectBlock)(CTBaseBatchRequest * _Nonnull reques
 /**
  *  HTTP请求的方法，默认GET，现支持GET和POST, DELETE , PUT
  */
-@property (nonatomic, assign) CTNetworkRequestHTTPMethod requestMethod;
+@property (nonatomic, assign) CTRequestHTTPMethod requestMethod;
 
 /**
  *  缓存策略，默认为CTNetworkRquestCacheNone

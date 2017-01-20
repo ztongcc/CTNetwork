@@ -341,7 +341,7 @@ static CTNetworkManager *_manager = nil;
     //发送请求
     __weak CTNetworkManager * weakManager = self;
     switch (request.requestMethod) {
-        case CTNetworkRequestHTTPGet:
+        case CTHTTPMethodGET:
         {
             request.sessionTask = [self.sessionManager GET:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject];
@@ -350,7 +350,7 @@ static CTNetworkManager *_manager = nil;
             }];
         }
             break;
-        case CTNetworkRequestHTTPPost:
+        case CTHTTPMethodPOST:
         {
             request.sessionTask = [self.sessionManager POST:url parameters:param progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject];
@@ -359,7 +359,7 @@ static CTNetworkManager *_manager = nil;
             }];
         }
             break;
-        case CTNetworkRequestHTTPDelete:
+        case CTHTTPMethodDELETE:
         {
             request.sessionTask = [self.sessionManager DELETE:url parameters:param success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject];
@@ -369,7 +369,7 @@ static CTNetworkManager *_manager = nil;
         }
             break;
 
-        case CTNetworkRequestHTTPPut:
+        case CTHTTPMethodPUT:
         {
             request.sessionTask = [self.sessionManager PUT:url parameters:param success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 [weakManager networkSuccess:request task:task responseData:responseObject ];
@@ -630,7 +630,7 @@ static CTNetworkManager *_manager = nil;
                              failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
     CTBaseRequest * req = [[CTBaseRequest alloc] init];
-    req.requestMethod = CTNetworkRequestHTTPGet;
+    req.requestMethod = CTHTTPMethodGET;
     req.successBlock = successBlock;
     req.failureBlock = failureBlock;
     NSAssert(reqBlock, @"请设置请求接口 (interface)");
@@ -644,7 +644,7 @@ static CTNetworkManager *_manager = nil;
                               failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
     CTBaseRequest * req = [[CTBaseRequest alloc] init];
-    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.requestMethod = CTHTTPMethodPOST;
     req.successBlock = successBlock;
     req.failureBlock = failureBlock;
     NSAssert(reqBlock, @"请设置请求接口 (interface)");
@@ -659,7 +659,7 @@ static CTNetworkManager *_manager = nil;
                                 failure:(CTNetworkFailureBlock _Nullable)failureBlock
 {
     CTBaseRequest * req = [[CTBaseRequest alloc] init];
-    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.requestMethod = CTHTTPMethodPOST;
     req.progressBlock = progressBlock;
     req.successBlock = successBlock;
     req.failureBlock = failureBlock;
@@ -675,7 +675,7 @@ static CTNetworkManager *_manager = nil;
                           complectHandler:(CTNetworkDownloadBlock _Nonnull)complectBlock
 {
     CTBaseRequest * req = [[CTBaseRequest alloc] init];
-    req.requestMethod = CTNetworkRequestHTTPPost;
+    req.requestMethod = CTHTTPMethodPOST;
     req.progressBlock = progressBlock;
     req.downloadBlock = complectBlock;
     NSAssert(reqBlock, @"请设置请求接口 (interface)");

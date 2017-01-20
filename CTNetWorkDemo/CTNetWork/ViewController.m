@@ -76,7 +76,6 @@
 
 - (void)uploadRequestExample
 {
-    
     UIImage *image = [UIImage imageNamed:@"test.png"];
     CTBaseRequest * request = [[CTBaseRequest alloc] initWithInterface:@"http://public.aiweiker.com/index.PHP?g=App&m=HomePage&a=updateBg"];
     request.parameterDict = @{@"home":@"{\"uid\":\"412412412242\"}"};
