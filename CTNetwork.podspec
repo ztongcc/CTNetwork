@@ -13,6 +13,6 @@ s.summary      = "CTNetWork is a net request util based on AFNetworking, base on
   s.platform      = :ios, '7.0'
   s.requires_arc  = true
   s.frameworks    = 'UIKit'
-  s.dependency 'AFNetworking', '~> 3.0.2'
+  s.dependency 'AFNetworking', '~> 3.1.0'
 
 end
